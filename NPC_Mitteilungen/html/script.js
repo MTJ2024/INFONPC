@@ -74,6 +74,7 @@ function renderNPCList() {
                     <div class="npc-item-actions">
                         <button class="btn-spawn" onclick="spawnNPC(${index})">Spawn</button>
                         <button class="btn-edit" onclick="editNPC(${index})">Edit</button>
+                        <button class="btn-delete" onclick="deleteNPCFromList(${index})">✕</button>
                     </div>
                 </div>
                 <div class="npc-item-info">
@@ -92,7 +93,6 @@ function openCreateForm() {
     document.getElementById('welcomeMessage').style.display = 'none';
     document.getElementById('npcForm').style.display = 'block';
     document.getElementById('formTitle').textContent = 'Neuer NPC';
-    document.getElementById('deleteBtn').style.display = 'none';
     
     // Reset form
     document.getElementById('npcId').value = '';
@@ -114,7 +114,6 @@ function editNPC(index) {
     document.getElementById('welcomeMessage').style.display = 'none';
     document.getElementById('npcForm').style.display = 'block';
     document.getElementById('formTitle').textContent = `NPC #${index + 1} bearbeiten`;
-    document.getElementById('deleteBtn').style.display = 'block';
     
     // Fill form with NPC data
     document.getElementById('npcId').value = index;
@@ -241,6 +240,29 @@ function deleteNPC() {
     }).then(() => {
         loadNPCs();
         cancelForm();
+    });
+}
+
+// Delete NPC from list (with confirmation)
+function deleteNPCFromList(index) {
+    if (!confirm('Möchtest du NPC #' + (index + 1) + ' wirklich löschen?')) {
+        return;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/deleteNPC`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ index: index })
+    }).then(() => {
+        // Close form if the deleted NPC was being edited
+        if (selectedNPC === index) {
+            cancelForm();
+        } else if (selectedNPC !== null && selectedNPC > index) {
+            // Adjust selected index if necessary
+            selectedNPC--;
+        }
     });
 }
 

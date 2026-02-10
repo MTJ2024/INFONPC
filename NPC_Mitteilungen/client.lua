@@ -58,6 +58,14 @@ RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
         end
         ::continue::
     end
+    
+    -- Update dashboard if open
+    if isDashboardOpen then
+        SendNUIMessage({
+            action = 'updateNPCs',
+            npcs = cfgs
+        })
+    end
 end)
 
 function getRandomPointInRadius(center, radius)
@@ -148,6 +156,14 @@ RegisterCommand('npcadmin', function()
     end
 end, false)
 
+RegisterCommand('npc', function()
+    if not isDashboardOpen then
+        openDashboard()
+    else
+        closeDashboard()
+    end
+end, false)
+
 function openDashboard()
     isDashboardOpen = true
     SetNuiFocus(true, true)
@@ -178,25 +194,11 @@ end)
 
 RegisterNUICallback('saveNPC', function(data, cb)
     TriggerServerEvent('safenpc:saveNPC', data.npc, data.index)
-    Citizen.Wait(500)
-    ESX.TriggerServerCallback('safenpc:getNPCs', function(npcs)
-        SendNUIMessage({
-            action = 'updateNPCs',
-            npcs = npcs
-        })
-    end)
     cb('ok')
 end)
 
 RegisterNUICallback('deleteNPC', function(data, cb)
     TriggerServerEvent('safenpc:deleteNPC', data.index)
-    Citizen.Wait(500)
-    ESX.TriggerServerCallback('safenpc:getNPCs', function(npcs)
-        SendNUIMessage({
-            action = 'updateNPCs',
-            npcs = npcs
-        })
-    end)
     cb('ok')
 end)
 

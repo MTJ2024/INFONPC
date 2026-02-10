@@ -157,6 +157,15 @@ body {
     background: #2563eb;
 }
 
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}
+
 .npc-item-info {
     color: #aaa;
     font-size: 12px;

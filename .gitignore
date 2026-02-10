@@ -1,0 +1,11 @@
+# NPC Data File (auto-generated)
+NPC_Mitteilungen/npcs_data.json
+
+# FiveM/FXServer files
+*.log
+cache/
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
