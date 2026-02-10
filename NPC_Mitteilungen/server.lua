@@ -1,99 +1,124 @@
 ESX = exports["es_extended"]:getSharedObject()
 
-local spawnedBoats = {}
-local lastSpawnTimestamps = {}
-local playerBoatCounts = {}
+local NPCData = {}
+local dataFile = "npcs_data.json"
 
-local function isPlayerAllowed(source)
-    local xPlayer = ESX.GetPlayerFromId(source)
-    if not xPlayer then return false, "no_esx" end
-
-    -- Gruppenprüfung
-    local allowed = false
-    for _, group in ipairs(Config.AllowedGroups) do
-        if xPlayer.getGroup() == group then
-            allowed = true
-            break
+-- Load NPCs from file
+function LoadNPCsFromFile()
+    local file = LoadResourceFile(GetCurrentResourceName(), dataFile)
+    if file then
+        local success, data = pcall(json.decode, file)
+        if success and data then
+            NPCData = data
+            print("[SafeNPC] Loaded " .. #NPCData .. " NPCs from file")
+            return NPCData
+        else
+            print("[SafeNPC] Error parsing JSON file, using default config")
         end
+    else
+        print("[SafeNPC] No data file found, using default config")
     end
-    if not allowed then return false, "group" end
-
-    -- Cooldown
-    local now = os.time()
-    if lastSpawnTimestamps[source] and now - lastSpawnTimestamps[source] < Config.SpawnCooldown then
-        return false, "cooldown"
-    end
-
-    -- Max Boats per Player
-    playerBoatCounts[source] = playerBoatCounts[source] or 0
-    if playerBoatCounts[source] >= Config.MaxBoatsPerPlayer then
-        return false, "maxboats"
-    end
-
-    return true, ""
+    
+    -- If no file or error, use config
+    NPCData = NPCConfigs
+    SaveNPCsToFile()
+    return NPCData
 end
 
--- Boot anfordern (Callback! KEIN Event!)
-ESX.RegisterServerCallback("mtj_boats:requestSpawnBoat", function(source, cb, point)
-    local allowed, reason = isPlayerAllowed(source)
-    if not allowed then
-        cb(false, "Du darfst aktuell kein Boot spawnen. Grund: "..reason)
+-- Save NPCs to file
+function SaveNPCsToFile()
+    local success = SaveResourceFile(GetCurrentResourceName(), dataFile, json.encode(NPCData, {indent = true}), -1)
+    if success then
+        print("[SafeNPC] Saved " .. #NPCData .. " NPCs to file")
+    else
+        print("[SafeNPC] Error saving NPCs to file!")
+    end
+end
+
+-- Initialize
+Citizen.CreateThread(function()
+    LoadNPCsFromFile()
+end)
+
+-- Sync NPCs to clients
+RegisterNetEvent("safenpc:requestSync", function()
+    TriggerClientEvent("safenpc:spawnAllNPCs", source, NPCData)
+end)
+
+-- Get NPCs callback
+ESX.RegisterServerCallback('safenpc:getNPCs', function(source, cb)
+    cb(NPCData)
+end)
+
+-- Save NPC
+RegisterNetEvent('safenpc:saveNPC', function(npcData, index)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
+    
+    -- Check permissions (admin only)
+    if xPlayer.getGroup() ~= 'admin' and xPlayer.getGroup() ~= 'superadmin' then
+        TriggerClientEvent('esx:showNotification', source, 'Keine Berechtigung!')
         return
     end
-
-    -- Boot am selben Punkt prüfen
-    for _, boat in ipairs(spawnedBoats) do
-        if boat.point and point and boat.point.x == point.x and boat.point.y == point.y and boat.point.z == point.z then
-            cb(false, "An diesem Punkt existiert bereits ein Boot!")
-            return
-        end
+    
+    if index >= 0 and index < #NPCData then
+        -- Edit existing NPC
+        NPCData[index + 1] = npcData
+        print("[SafeNPC] Updated NPC #" .. (index + 1))
+    else
+        -- Add new NPC
+        table.insert(NPCData, npcData)
+        print("[SafeNPC] Added new NPC #" .. #NPCData)
     end
-
-    -- Boot registrieren
-    table.insert(spawnedBoats, {point = point, owner = source, time = os.time()})
-    lastSpawnTimestamps[source] = os.time()
-    playerBoatCounts[source] = (playerBoatCounts[source] or 0) + 1
-
-    cb(true, "Boot erfolgreich gespawnt!")
+    
+    SaveNPCsToFile()
+    
+    -- Update all clients
+    TriggerClientEvent("safenpc:spawnAllNPCs", -1, NPCData)
+    TriggerClientEvent('esx:showNotification', source, 'NPC gespeichert!')
 end)
 
--- Boot entfernen (Callback! KEIN Event!)
-ESX.RegisterServerCallback("mtj_boats:deleteBoat", function(source, cb, point)
+-- Delete NPC
+RegisterNetEvent('safenpc:deleteNPC', function(index)
     local xPlayer = ESX.GetPlayerFromId(source)
-    local isAdmin = false
-    for _, group in ipairs(Config.AllowedGroups) do
-        if xPlayer and xPlayer.getGroup() == group then isAdmin = true break end
+    if not xPlayer then return end
+    
+    -- Check permissions (admin only)
+    if xPlayer.getGroup() ~= 'admin' and xPlayer.getGroup() ~= 'superadmin' then
+        TriggerClientEvent('esx:showNotification', source, 'Keine Berechtigung!')
+        return
     end
-    for i = #spawnedBoats, 1, -1 do
-        local boat = spawnedBoats[i]
-        if boat.point and point and boat.point.x == point.x and boat.point.y == point.y and boat.point.z == point.z then
-            if boat.owner == source or isAdmin then
-                table.remove(spawnedBoats, i)
-                playerBoatCounts[boat.owner] = math.max((playerBoatCounts[boat.owner] or 1) - 1, 0)
-                cb(true, "Boot entfernt!")
-                return
-            else
-                cb(false, "Keine Berechtigung, dieses Boot zu löschen!")
-                return
-            end
-        end
+    
+    if index >= 0 and index < #NPCData then
+        table.remove(NPCData, index + 1)
+        print("[SafeNPC] Deleted NPC #" .. (index + 1))
+        SaveNPCsToFile()
+        
+        -- Update all clients
+        TriggerClientEvent("safenpc:spawnAllNPCs", -1, NPCData)
+        TriggerClientEvent('esx:showNotification', source, 'NPC gelöscht!')
     end
-    cb(false, "Kein Boot an diesem Punkt gefunden!")
 end)
 
--- SERVER-SEITIG: Bootsliste für Clients bereitstellen (Callback! KEIN Event!)
-ESX.RegisterServerCallback("mtj_boats:getSpawnedBoats", function(source, cb)
-    cb(spawnedBoats)
+-- Spawn single NPC
+RegisterNetEvent('safenpc:spawnSingleNPC', function(index)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
+    
+    -- Check permissions (admin only)
+    if xPlayer.getGroup() ~= 'admin' and xPlayer.getGroup() ~= 'superadmin' then
+        TriggerClientEvent('esx:showNotification', source, 'Keine Berechtigung!')
+        return
+    end
+    
+    if index >= 0 and index < #NPCData then
+        local cfg = NPCData[index + 1]
+        TriggerClientEvent('safenpc:respawnSingleNPC', source, index + 1, cfg)
+        TriggerClientEvent('esx:showNotification', source, 'NPC gespawnt!')
+    end
 end)
 
--- Aufräumen beim Disconnect
-AddEventHandler("playerDropped", function(reason)
-    local src = source
-    for i = #spawnedBoats, 1, -1 do
-        if spawnedBoats[i].owner == src then
-            table.remove(spawnedBoats, i)
-        end
-    end
-    playerBoatCounts[src] = nil
-    lastSpawnTimestamps[src] = nil
+-- Interact with NPC
+RegisterNetEvent("safenpc:interact", function(idx)
+    TriggerClientEvent("safenpc:showDialog", source, idx)
 end)

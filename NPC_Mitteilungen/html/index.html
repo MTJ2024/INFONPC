@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" style="display: none;">
+        <div class="container">
+            <div class="header">
+                <h1>NPC Dashboard</h1>
+                <button class="close-btn" onclick="closeUI()">✕</button>
+            </div>
+            
+            <div class="main-content">
+                <!-- Left Panel: NPC List -->
+                <div class="npc-list-panel">
+                    <div class="panel-header">
+                        <h2>NPC Liste</h2>
+                        <button class="btn-primary" onclick="openCreateForm()">+ Neuer NPC</button>
+                    </div>
+                    <div class="npc-list" id="npcList">
+                        <!-- NPCs will be loaded here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Right Panel: NPC Details/Form -->
+                <div class="npc-form-panel">
+                    <div id="formContainer">
+                        <div id="welcomeMessage">
+                            <h2>Willkommen!</h2>
+                            <p>Wähle einen NPC aus der Liste oder erstelle einen neuen.</p>
+                            <div class="help-section">
+                                <h3>Anleitung:</h3>
+                                <ol>
+                                    <li>Gehe zur gewünschten Position</li>
+                                    <li>Drücke <kbd>ENTER</kbd> um Koordinaten zu setzen</li>
+                                    <li>Fülle die NPC-Daten aus</li>
+                                    <li>Klicke auf "Speichern"</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div id="npcForm" style="display: none;">
+                            <h2 id="formTitle">Neuer NPC</h2>
+                            <input type="hidden" id="npcId" value="">
+                            
+                            <div class="form-group">
+                                <label>Position (Drücke ENTER an der gewünschten Stelle)</label>
+                                <div class="coord-display" id="coordDisplay">
+                                    <span id="coordText">Nicht gesetzt</span>
+                                    <button type="button" class="btn-secondary" onclick="captureCoords()">Position setzen</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pedModel">Ped Model</label>
+                                <select id="pedModel" class="form-control">
+                                    <option value="a_m_y_hipster_01">Hipster</option>
+                                    <option value="a_m_y_business_01">Business Mann</option>
+                                    <option value="a_m_m_indian_01">Indisch</option>
+                                    <option value="a_m_m_bevhills_02">Beverly Hills Mann</option>
+                                    <option value="s_m_m_pilot_01">Pilot</option>
+                                    <option value="a_f_y_business_01">Business Frau</option>
+                                    <option value="a_f_m_bevhills_01">Beverly Hills Frau</option>
+                                    <option value="s_m_y_cop_01">Polizist</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="scenario">Szenario</label>
+                                <select id="scenario" class="form-control">
+                                    <option value="WORLD_HUMAN_CLIPBOARD">Clipboard</option>
+                                    <option value="WORLD_HUMAN_GUARD_STAND">Wache stehen</option>
+                                    <option value="WORLD_HUMAN_SMOKING">Rauchen</option>
+                                    <option value="WORLD_HUMAN_AA_COFFEE">Kaffee trinken</option>
+                                    <option value="WORLD_HUMAN_HANG_OUT_STREET">Abhängen</option>
+                                    <option value="">Kein Szenario</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enablePatrol">
+                                    Patrouille aktivieren
+                                </label>
+                            </div>
+                            
+                            <div class="form-group" id="patrolRadiusGroup" style="display: none;">
+                                <label for="patrolRadius">Patrouille Radius (m)</label>
+                                <input type="number" id="patrolRadius" class="form-control" value="10" min="1" max="50">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="messages">Nachrichten (eine pro Zeile)</label>
+                                <textarea id="messages" class="form-control" rows="8" placeholder="Zeile 1&#10;Zeile 2&#10;Zeile 3"></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn-primary" onclick="saveNPC()">Speichern</button>
+                                <button class="btn-secondary" onclick="cancelForm()">Abbrechen</button>
+                                <button class="btn-danger" id="deleteBtn" onclick="deleteNPC()" style="display: none;">Löschen</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
