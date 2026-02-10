@@ -1,5 +1,68 @@
 local myNPCs = {}
 local isInteracting = false
+local isUIOpen = false
+
+-- NUI Management Command
+RegisterCommand('npc_info', function()
+    TriggerServerEvent('safenpc:requestUIAccess')
+end, false)
+
+-- Open UI from server
+RegisterNetEvent('safenpc:openUI', function(npcs)
+    isUIOpen = true
+    SetNuiFocus(true, true)
+    SendNUIMessage({
+        action = 'open',
+        npcs = npcs
+    })
+end)
+
+-- NUI Callbacks
+RegisterNUICallback('closeUI', function(data, cb)
+    isUIOpen = false
+    SetNuiFocus(false, false)
+    cb('ok')
+end)
+
+RegisterNUICallback('saveNPC', function(data, cb)
+    TriggerServerEvent('safenpc:saveNPC', data.index, data.npc)
+    cb('ok')
+end)
+
+RegisterNUICallback('deleteNPC', function(data, cb)
+    TriggerServerEvent('safenpc:deleteNPC', data.index)
+    cb('ok')
+end)
+
+RegisterNUICallback('getCurrentPosition', function(data, cb)
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    SendNUIMessage({
+        action = 'setPosition',
+        coords = { x = coords.x, y = coords.y, z = coords.z }
+    })
+    cb('ok')
+end)
+
+RegisterNUICallback('getCurrentHeading', function(data, cb)
+    local playerPed = PlayerPedId()
+    local heading = GetEntityHeading(playerPed)
+    SendNUIMessage({
+        action = 'setHeading',
+        heading = heading
+    })
+    cb('ok')
+end)
+
+-- Update NPC list in UI
+RegisterNetEvent('safenpc:updateUIList', function(npcs)
+    if isUIOpen then
+        SendNUIMessage({
+            action = 'updateNPCs',
+            npcs = npcs
+        })
+    end
+end)
 
 RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
     -- Lösche alte NPCs
