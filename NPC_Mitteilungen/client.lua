@@ -216,7 +216,9 @@ end)
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
-        if isCapturingCoords and IsControlJustReleased(0, 191) then -- ENTER key
+        if not isDashboardOpen or not isCapturingCoords then
+            Citizen.Wait(500)
+        elseif IsControlJustReleased(0, 191) then -- ENTER key
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)

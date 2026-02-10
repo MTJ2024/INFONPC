@@ -279,8 +279,7 @@ function cancelForm() {
 function GetParentResourceName() {
     let resource = window.location.hostname;
     if (resource === '') {
-        resource = 'nui-frame-' + (window.name || 'unknown');
-        resource = resource.replace(/nui-frame-/, '');
+        resource = window.name || 'unknown';
     }
     return resource;
 }

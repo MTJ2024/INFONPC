@@ -61,7 +61,7 @@ RegisterNetEvent('safenpc:saveNPC', function(npcData, index)
         return
     end
     
-    if index >= 0 and index < #NPCData then
+    if index >= 0 and index <= #NPCData - 1 then
         -- Edit existing NPC
         NPCData[index + 1] = npcData
         print("[SafeNPC] Updated NPC #" .. (index + 1))
@@ -89,7 +89,7 @@ RegisterNetEvent('safenpc:deleteNPC', function(index)
         return
     end
     
-    if index >= 0 and index < #NPCData then
+    if index >= 0 and index <= #NPCData - 1 then
         table.remove(NPCData, index + 1)
         print("[SafeNPC] Deleted NPC #" .. (index + 1))
         SaveNPCsToFile()
@@ -111,7 +111,7 @@ RegisterNetEvent('safenpc:spawnSingleNPC', function(index)
         return
     end
     
-    if index >= 0 and index < #NPCData then
+    if index >= 0 and index <= #NPCData - 1 then
         local cfg = NPCData[index + 1]
         TriggerClientEvent('safenpc:respawnSingleNPC', source, index + 1, cfg)
         TriggerClientEvent('esx:showNotification', source, 'NPC gespawnt!')
