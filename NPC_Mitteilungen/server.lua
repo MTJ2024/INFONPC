@@ -4,7 +4,7 @@
 RegisterNetEvent("safenpc:requestSync", function()
     local src = source
     -- Sende alle NPC-Konfigurationen an den anfragenden Client
-    if NPCConfigs and #NPCConfigs > 0 then
+    if NPCConfigs and type(NPCConfigs) == 'table' and #NPCConfigs > 0 then
         TriggerClientEvent("safenpc:spawnAllNPCs", src, NPCConfigs)
     else
         print("^1[NPC-Mitteilungen Server]^7 FEHLER: NPCConfigs nicht gefunden!")
