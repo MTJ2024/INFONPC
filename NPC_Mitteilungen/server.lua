@@ -21,7 +21,7 @@ end)
 AddEventHandler("onResourceStart", function(resourceName)
     if resourceName == GetCurrentResourceName() then
         print("^2[NPC-Mitteilungen Server]^7 Resource gestartet - NPCs werden synchronisiert")
-        if NPCConfigs and #NPCConfigs > 0 then
+        if NPCConfigs and type(NPCConfigs) == 'table' and #NPCConfigs > 0 then
             -- Synchronisiere alle Clients
             TriggerClientEvent("safenpc:spawnAllNPCs", -1, NPCConfigs)
             print("^2[NPC-Mitteilungen Server]^7 " .. #NPCConfigs .. " NPCs synchronisiert")
