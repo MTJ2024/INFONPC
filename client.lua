@@ -1,6 +1,7 @@
 local myNPCs = {}
 local isInteracting = false
 local isUIOpen = false
+local currentNPCConfigs = {} -- Cache der aktuellen NPC-Konfigurationen
 
 -- NUI Management Command
 RegisterCommand('npc_info', function()
@@ -65,6 +66,9 @@ RegisterNetEvent('safenpc:updateUIList', function(npcs)
 end)
 
 RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
+    -- Speichere die aktuellen Konfigurationen
+    currentNPCConfigs = cfgs
+    
     -- Lösche alte NPCs
     for idx, ped in pairs(myNPCs) do
         if DoesEntityExist(ped) then DeleteEntity(ped) end
@@ -154,10 +158,12 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterNetEvent("safenpc:showDialog", function(idx)
-    local cfg = NPCConfigs[idx]
-    if not cfg then isInteracting = false return end
-    displayMessagesAbovePlayer(cfg.messages, function() isInteracting = false end)
+RegisterNetEvent("safenpc:showDialog", function(npcData)
+    if not npcData or not npcData.messages then 
+        isInteracting = false 
+        return 
+    end
+    displayMessagesAbovePlayer(npcData.messages, function() isInteracting = false end)
 end)
 
 function drawTextAbovePlayer(entity, text, scale)

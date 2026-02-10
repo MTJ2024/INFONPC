@@ -166,7 +166,10 @@ end)
 RegisterNetEvent("safenpc:interact", function(idx)
     local src = source
     -- Spieler interagiert mit NPC, sende Dialog zurück
-    TriggerClientEvent("safenpc:showDialog", src, idx)
+    local npcs = getCurrentNPCs()
+    if npcs and npcs[idx] then
+        TriggerClientEvent("safenpc:showDialog", src, npcs[idx])
+    end
 end)
 
 -- Optional: Bei Serverstart alle Clients synchronisieren

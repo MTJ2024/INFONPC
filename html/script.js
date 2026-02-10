@@ -213,5 +213,11 @@ function getCurrentHeading() {
 }
 
 function GetParentResourceName() {
+    // FiveM NUI uses a special URL format
+    // Extract resource name from the current page URL
+    if (window.location.href.includes('nui://')) {
+        const matches = window.location.href.match(/nui:\/\/([^\/]+)\//);
+        return matches ? matches[1] : 'INFONPC';
+    }
     return 'INFONPC';
 }
