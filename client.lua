@@ -8,6 +8,11 @@ RegisterCommand('npc_info', function()
     TriggerServerEvent('safenpc:requestUIAccess')
 end, false)
 
+-- Alias für einfacheren Zugriff
+RegisterCommand('npc', function()
+    TriggerServerEvent('safenpc:requestUIAccess')
+end, false)
+
 -- Open UI from server
 RegisterNetEvent('safenpc:openUI', function(npcs)
     isUIOpen = true
@@ -139,21 +144,43 @@ end)
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(0)
-        local playerPed = PlayerPedId()
-        local playerCoords = GetEntityCoords(playerPed)
-        for idx, ped in pairs(myNPCs) do
-            if ped and DoesEntityExist(ped) then
-                local pedCoords = GetEntityCoords(ped)
-                local dist = #(playerCoords - pedCoords)
-                if dist < 3.0 and not isInteracting then
-                    drawTextAbovePlayer(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726)
-                    if IsControlJustReleased(0, 38) then
-                        isInteracting = true
-                        TriggerServerEvent("safenpc:interact", idx)
+        -- Wenn UI offen ist, längere Wartezeit (kein NPC-Checking nötig)
+        if isUIOpen then
+            Citizen.Wait(1000)
+        else
+            local sleep = 500 -- Standard-Wartezeit wenn weit weg
+            local playerPed = PlayerPedId()
+            local playerCoords = GetEntityCoords(playerPed)
+            local nearNPC = false
+            
+            for idx, ped in pairs(myNPCs) do
+                if ped and DoesEntityExist(ped) then
+                    local pedCoords = GetEntityCoords(ped)
+                    local dist = #(playerCoords - pedCoords)
+                    
+                    -- Nur in der Nähe (< 10m) genauer prüfen
+                    if dist < 10.0 then
+                        nearNPC = true
+                        
+                        -- Interaktions-Range (< 3m)
+                        if dist < 3.0 and not isInteracting then
+                            sleep = 0 -- Schnelle Updates für Interaktion
+                            drawTextAbovePlayer(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726)
+                            if IsControlJustReleased(0, 38) then
+                                isInteracting = true
+                                TriggerServerEvent("safenpc:interact", idx)
+                            end
+                        end
                     end
                 end
             end
+            
+            -- Dynamische Wartezeit basierend auf Nähe zu NPCs
+            if nearNPC and sleep > 0 then
+                sleep = 100 -- Mittlere Wartezeit wenn in der Nähe
+            end
+            
+            Citizen.Wait(sleep)
         end
     end
 end)

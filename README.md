@@ -48,7 +48,8 @@ Diese Resource fügt NPCs als interaktive Informationsquellen zu deinem FiveM GT
 
 #### UI öffnen:
 ```
-/npc_info
+/npc_info   - Öffnet das NPC Management UI
+/npc        - Kurzbefehl (Alias für /npc_info)
 ```
 
 #### NPCs erstellen:
