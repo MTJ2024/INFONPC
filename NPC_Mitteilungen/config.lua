@@ -1,3 +1,22 @@
+-- Verfügbare Schriftarten (3 Stück)
+-- "pricedown"  = Pricedown (GTA-Stil, Font 7)
+-- "chalet"     = Chalet London (Standard, Font 0)
+-- "condensed"  = Chalet Comprimé (Schmal, Font 4)
+TextFonts = {
+    ["pricedown"] = 7,
+    ["chalet"]    = 0,
+    ["condensed"] = 4,
+}
+
+-- Verfügbare Farben (5 Stück) - {R, G, B, A}
+TextColors = {
+    ["gold"]   = {255, 223, 0, 255},
+    ["weiss"]  = {255, 255, 255, 255},
+    ["rot"]    = {255, 50, 50, 255},
+    ["gruen"]  = {50, 255, 50, 255},
+    ["blau"]   = {100, 150, 255, 255},
+}
+
 NPCConfigs = {
     {
         position = vector3(5328.949219, -5249.182617, 32.632935),
@@ -6,6 +25,9 @@ NPCConfigs = {
         patrolRadius = 10.0,
         enablePatrol = true,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "pricedown",
+        textColor = "gold",
+        textScale = 0.968,
         messages = {
             "Willkommen, Bürger...",
             "Wie ich sehe, bist du hier, um Geld zu machen!",
@@ -22,6 +44,9 @@ NPCConfigs = {
         patrolRadius = 10.0,
         enablePatrol = false,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "chalet",
+        textColor = "weiss",
+        textScale = 0.80,
         messages = {
             "Willkommen, Bürger...",
             "Wie ich sehe, bist du hier, um Geld zu machen!",
@@ -39,6 +64,9 @@ NPCConfigs = {
         patrolRadius = 10.0,
         enablePatrol = false,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "condensed",
+        textColor = "gruen",
+        textScale = 0.85,
         messages = {
             "Willkommen, Bürger...",
             "Wie ich sehe, bist du hier, um Geld zu machen!",
@@ -54,6 +82,9 @@ NPCConfigs = {
         patrolRadius = 5.0,
         enablePatrol = false,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "pricedown",
+        textColor = "rot",
+        textScale = 0.90,
         messages = {
             "Hallo Bürger...",
             "Willkommen auf Petros Weinfelder!",
@@ -71,6 +102,9 @@ NPCConfigs = {
         patrolRadius = 8.0,
         enablePatrol = true,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "chalet",
+        textColor = "blau",
+        textScale = 0.85,
         messages = {
             "Hallo Bienenfreund...",
             "Willkommen auf Peters Bienenstock!",
@@ -89,6 +123,9 @@ NPCConfigs = {
         patrolRadius = 18.0,
         enablePatrol = true,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "condensed",
+        textColor = "gold",
+        textScale = 0.95,
         messages = {
             "Hallo Kartoffelfreund...",
             "Willkommen auf Manfreds Kartoffelfeld!",
@@ -107,6 +144,9 @@ NPCConfigs = {
         patrolRadius = 3.0,
         enablePatrol = false,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "pricedown",
+        textColor = "gruen",
+        textScale = 1.0,
         messages = {
             "Willkommen in GreenZone420!",
             "Hier startet dein Abenteuer in einer pulsierenden Stadt,",
@@ -123,6 +163,9 @@ NPCConfigs = {
         patrolRadius = 15.0,
         enablePatrol = true,
         scenario = "WORLD_HUMAN_CLIPBOARD",
+        textFont = "chalet",
+        textColor = "weiss",
+        textScale = 0.90,
         messages = {
             "Willkommen bei STO Motors!",
             "Hier finden Sie die besten LKWs der Stadt.",
