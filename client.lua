@@ -100,9 +100,12 @@ RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
         -- Patrouille
         if cfg.enablePatrol and cfg.patrolRadius > 0 then
             Citizen.CreateThread(function()
+                local patrolSpeed = (Config and Config.PatrolSpeed) or 1.0
+                local patrolWait = (Config and Config.PatrolWaitTime) or 5000
+                local patrolMaxSteps = (Config and Config.PatrolMaxSteps) or 50
                 while DoesEntityExist(ped) do
                     local target = getRandomPointInRadius(cfg.position, cfg.patrolRadius)
-                    TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, 1.0, 0, 0, 786603, 0)
+                    TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, patrolSpeed, 0, 0, 786603, 0)
                     local steps, arrived = 0, false
                     while not arrived and DoesEntityExist(ped) do
                         Citizen.Wait(500)
@@ -111,15 +114,15 @@ RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
                         local distance = #(pedCoords - target)
                         if distance < 1.0 then
                             arrived = true
-                        elseif steps > 50 then
+                        elseif steps > patrolMaxSteps then
                             target = getRandomPointInRadius(cfg.position, cfg.patrolRadius)
-                            TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, 1.0, 0, 0, 786603, 0)
+                            TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, patrolSpeed, 0, 0, 786603, 0)
                             steps = 0
                         end
                     end
                     if DoesEntityExist(ped) and cfg.scenario then
                         TaskStartScenarioInPlace(ped, cfg.scenario, 0, true)
-                        Citizen.Wait(5000)
+                        Citizen.Wait(patrolWait)
                     end
                 end
             end)
@@ -157,19 +160,22 @@ Citizen.CreateThread(function()
                 if ped and DoesEntityExist(ped) then
                     local pedCoords = GetEntityCoords(ped)
                     local dist = #(playerCoords - pedCoords)
+                    local drawDist = (Config and Config.DrawDistance) or 10.0
+                    local interactDist = (Config and Config.InteractDistance) or 3.0
+                    local interactKey = (Config and Config.InteractKey) or 38
                     
-                    -- Nur in der Nähe (< 10m) genauer prüfen
-                    if dist < 10.0 then
+                    -- Nur in der Nähe genauer prüfen
+                    if dist < drawDist then
                         nearNPC = true
                         
-                        -- Interaktions-Range (< 3m)
-                        if dist < 3.0 and not isInteracting then
+                        -- Interaktions-Range
+                        if dist < interactDist and not isInteracting then
                             sleep = 0 -- Schnelle Updates für Interaktion
                             local cfg = currentNPCConfigs[idx]
                             local font = cfg and cfg.textFont or "pricedown"
                             local color = cfg and cfg.textColor or "gold"
                             drawTextAbovePlayer(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726, font, color)
-                            if IsControlJustReleased(0, 38) then
+                            if IsControlJustReleased(0, interactKey) then
                                 isInteracting = true
                                 TriggerServerEvent("safenpc:interact", idx)
                             end
@@ -219,9 +225,9 @@ end
 
 function displayMessagesAbovePlayer(messages, scale, fontName, colorName, callback)
     Citizen.CreateThread(function()
+        local duration = (Config and Config.MessageDuration) or 3000
         for _, message in ipairs(messages) do
             local startTime = GetGameTimer()
-            local duration = 3000
             while GetGameTimer() - startTime < duration do
                 Citizen.Wait(0)
                 drawTextAbovePlayer(PlayerPedId(), message, scale, fontName, colorName)

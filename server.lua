@@ -5,18 +5,37 @@
 local DynamicNPCs = {}
 local configFilePath = "npcs_dynamic.json"
 
--- Admin-Gruppen (kann angepasst werden)
-local AdminGroups = {
-    "admin",
-    "superadmin",
-    "moderator"
-}
-
--- Funktion zum Prüfen, ob ein Spieler Admin ist
+-- Funktion zum Prüfen, ob ein Spieler Admin ist (liest Config.PermissionMode)
 local function isPlayerAdmin(source)
-    -- Einfache Version ohne Framework-Abhängigkeit
-    -- Kann mit ESX/QBCore etc. erweitert werden
-    return IsPlayerAceAllowed(source, "npc.admin")
+    local mode = Config and Config.PermissionMode or "none"
+
+    -- "none" = Jeder darf /npc nutzen (kein Berechtigungs-Check)
+    if mode == "none" then
+        return true
+    end
+
+    -- "ace" = Prüfe ACE-Berechtigung (muss in server.cfg eingerichtet sein)
+    if mode == "ace" then
+        local perm = Config.AcePermission or "npc.admin"
+        return IsPlayerAceAllowed(source, perm)
+    end
+
+    -- "steamids" = Prüfe ob Steam-ID in der Whitelist steht
+    if mode == "steamids" then
+        local allowed = Config.AllowedSteamIDs or {}
+        for _, id in ipairs(GetPlayerIdentifiers(source)) do
+            for _, steamId in ipairs(allowed) do
+                if id == steamId then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+
+    -- Unbekannter Modus → sicherheitshalber Zugriff verweigern + Warnung
+    print("^1[NPC Manager]^7 FEHLER: Unbekannter PermissionMode '" .. tostring(mode) .. "' — Zugriff verweigert! Bitte config.lua prüfen.")
+    return false
 end
 
 -- NPCs aus Datei laden

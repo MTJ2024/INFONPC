@@ -1,44 +1,142 @@
-TextFonts = {
-    ["pricedown"] = 7,
-    ["chalet"]    = 0,
-    ["condensed"] = 4,
+--[[
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                     🎭  NPC MANAGER — KONFIGURATION                            ║
+║                            Version 2.2.0                                       ║
+║                                                                                ║
+║   Alle Einstellungen für den NPC Manager.                                      ║
+║   Rechts findest du die Erklärung zu jeder Einstellung.                        ║
+║                                                                                ║
+║   Befehle:  /npc  oder  /npc_info  (öffnet das Admin-Panel)                    ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+]]
+
+Config = {}
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🔐  BERECHTIGUNGEN                                                         │
+-- │  Wer darf den /npc Befehl benutzen?                                         │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+Config.PermissionMode = "none"                  -- "none"     = Jeder Spieler darf /npc nutzen (kein Check)
+                                                -- "ace"      = Nur Spieler mit ACE-Berechtigung
+                                                --              → In server.cfg: add_ace group.admin npc.admin allow
+                                                -- "steamids" = Nur bestimmte Steam-IDs dürfen /npc nutzen
+
+Config.AcePermission = "npc.admin"              -- ACE-Berechtigung (nur wenn PermissionMode = "ace")
+                                                -- Beispiel server.cfg:
+                                                --   add_ace group.admin npc.admin allow
+                                                --   add_principal identifier.steam:xxxxx group.admin
+
+Config.AllowedSteamIDs = {                      -- Erlaubte Steam Hex-IDs (nur wenn PermissionMode = "steamids")
+    "steam:110000xxxxxxxxx",                    -- ← Ersetze mit deiner echten Steam Hex-ID
+    -- "steam:110000yyyyyyyyy",                 -- ← Weitere Admins hier eintragen
 }
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  📏  ENTFERNUNGEN & INTERAKTION                                             │
+-- │  Wie nah muss der Spieler am NPC sein?                                      │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+Config.InteractDistance = 3.0                    -- Entfernung in Metern, ab der "Drücke E" erscheint
+Config.DrawDistance = 10.0                       -- Entfernung in Metern, ab der der NPC-Check beginnt
+Config.InteractKey = 38                         -- Taste zum Interagieren (38 = E)
+                                                -- Andere Tasten: 47 = G, 74 = H, 311 = K
+                                                -- Volle Liste: https://docs.fivem.net/docs/game-references/controls/
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  💬  TEXT-ANZEIGE STANDARDWERTE                                             │
+-- │  Werden für neue NPCs als Default verwendet.                                │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+Config.DefaultTextFont = "pricedown"            -- Standard-Schriftart für neue NPCs
+                                                -- Optionen: "pricedown", "chalet", "condensed"
+
+Config.DefaultTextColor = "gold"                -- Standard-Textfarbe für neue NPCs
+                                                -- Optionen: "gold", "weiss", "rot", "gruen", "blau"
+
+Config.DefaultTextScale = 0.968                 -- Standard-Textgröße (0.4 bis 1.5)
+
+Config.MessageDuration = 3000                   -- Wie lange jede Nachricht angezeigt wird (in ms)
+                                                -- 3000 = 3 Sekunden pro Nachricht
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🚶  PATROL STANDARDWERTE                                                   │
+-- │  Werden für neue NPCs als Default verwendet.                                │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+Config.DefaultPatrolEnabled = false             -- Soll Patrol bei neuen NPCs aktiviert sein?
+Config.DefaultPatrolRadius = 10.0               -- Standard Patrol-Radius in Metern
+Config.PatrolSpeed = 1.0                        -- Laufgeschwindigkeit beim Patrouillieren
+Config.PatrolWaitTime = 5000                    -- Wartezeit am Zielpunkt in ms (5000 = 5 Sekunden)
+Config.PatrolMaxSteps = 50                      -- Max. Schritte bevor neues Ziel gewählt wird
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🔤  SCHRIFTARTEN                                                           │
+-- │  GTA V interne Font-IDs für die Textanzeige über dem NPC.                   │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+TextFonts = {
+    ["pricedown"] = 7,                          -- GTA-Standardschrift (fett, markant)
+    ["chalet"]    = 0,                          -- Saubere Standardschrift
+    ["condensed"] = 4,                          -- Schmale, kompakte Schrift
+}
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🎨  TEXTFARBEN                                                             │
+-- │  RGBA-Werte: {Rot, Grün, Blau, Alpha}  (jeweils 0-255)                     │
+-- └──────────────────────────────────────────────────────────────────────────────┘
 
 TextColors = {
-    ["gold"]  = {255, 223, 0, 255},
-    ["weiss"] = {255, 255, 255, 255},
-    ["rot"]   = {255, 50, 50, 255},
-    ["gruen"] = {50, 255, 50, 255},
-    ["blau"]  = {100, 150, 255, 255},
+    ["gold"]  = {255, 223, 0, 255},             -- Goldgelb (Standard)
+    ["weiss"] = {255, 255, 255, 255},           -- Weiß
+    ["rot"]   = {255, 50, 50, 255},             -- Rot (Warnung)
+    ["gruen"] = {50, 255, 50, 255},             -- Grün (Erfolg)
+    ["blau"]  = {100, 150, 255, 255},           -- Blau (Info)
 }
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🎬  SZENARIEN                                                              │
+-- │  Animationen die der NPC im Leerlauf abspielt.                              │
+-- └──────────────────────────────────────────────────────────────────────────────┘
 
 ScenarioList = {
-    ["WORLD_HUMAN_CLIPBOARD"]       = "Klemmbrett",
-    ["WORLD_HUMAN_GUARD_STAND"]     = "Wache stehen",
-    ["WORLD_HUMAN_SMOKING"]         = "Rauchen",
-    ["WORLD_HUMAN_DRINKING"]        = "Trinken",
-    ["WORLD_HUMAN_AA_COFFEE"]       = "Kaffee trinken",
-    ["WORLD_HUMAN_STAND_MOBILE"]    = "Am Handy",
-    ["WORLD_HUMAN_HANG_OUT_STREET"] = "Herumstehen",
-    ["WORLD_HUMAN_LEANING"]         = "Anlehnen",
-    ["WORLD_HUMAN_BUM_STANDING"]    = "Bettler",
-    ["WORLD_HUMAN_TOURIST_MAP"]     = "Karte lesen",
+    ["WORLD_HUMAN_CLIPBOARD"]       = "Klemmbrett",         -- Schreibt auf Klemmbrett
+    ["WORLD_HUMAN_GUARD_STAND"]     = "Wache stehen",       -- Steht stramm als Wache
+    ["WORLD_HUMAN_SMOKING"]         = "Rauchen",            -- Raucht eine Zigarette
+    ["WORLD_HUMAN_DRINKING"]        = "Trinken",            -- Trinkt aus einer Flasche
+    ["WORLD_HUMAN_AA_COFFEE"]       = "Kaffee trinken",     -- Trinkt Kaffee
+    ["WORLD_HUMAN_STAND_MOBILE"]    = "Am Handy",           -- Schaut aufs Handy
+    ["WORLD_HUMAN_HANG_OUT_STREET"] = "Herumstehen",        -- Steht locker herum
+    ["WORLD_HUMAN_LEANING"]         = "Anlehnen",           -- Lehnt sich an
+    ["WORLD_HUMAN_BUM_STANDING"]    = "Bettler",            -- Bettler-Animation
+    ["WORLD_HUMAN_TOURIST_MAP"]     = "Karte lesen",        -- Liest eine Karte
 }
 
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  👤  PED-MODELLE                                                            │
+-- │  Verfügbare NPC-Modelle mit deutschem Namen.                                │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
 PedModels = {
-    ["a_m_y_hipster_01"]    = "Hipster",
-    ["a_m_m_indian_01"]     = "Inder",
-    ["a_m_m_bevhills_02"]   = "Beverly Hills",
-    ["s_m_m_pilot_01"]      = "Pilot",
-    ["a_m_y_business_01"]   = "Geschäftsmann",
-    ["a_m_y_surfer_01"]     = "Surfer",
-    ["a_f_y_business_01"]   = "Geschäftsfrau",
-    ["s_m_y_cop_01"]        = "Polizist",
-    ["s_m_m_doctor_01"]     = "Arzt",
-    ["s_m_y_fireman_01"]    = "Feuerwehrmann",
-    ["u_m_y_tattoo_01"]     = "Tätowierer",
-    ["s_f_y_bartender_01"]  = "Barkeeperin",
+    ["a_m_y_hipster_01"]    = "Hipster",                    -- Junger Mann mit Bart
+    ["a_m_m_indian_01"]     = "Inder",                      -- Indischer Mann
+    ["a_m_m_bevhills_02"]   = "Beverly Hills",              -- Reicher Mann
+    ["s_m_m_pilot_01"]      = "Pilot",                      -- Flugzeugpilot
+    ["a_m_y_business_01"]   = "Geschäftsmann",              -- Mann im Anzug
+    ["a_m_y_surfer_01"]     = "Surfer",                     -- Surfer-Typ
+    ["a_f_y_business_01"]   = "Geschäftsfrau",              -- Frau im Blazer
+    ["s_m_y_cop_01"]        = "Polizist",                   -- LSPD Beamter
+    ["s_m_m_doctor_01"]     = "Arzt",                       -- Arzt in Weiß
+    ["s_m_y_fireman_01"]    = "Feuerwehrmann",              -- Feuerwehrmann
+    ["u_m_y_tattoo_01"]     = "Tätowierer",                 -- Tattoo-Künstler
+    ["s_f_y_bartender_01"]  = "Barkeeperin",                -- Barkeeperin
 }
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  📋  NPC-KONFIGURATIONEN                                                    │
+-- │  Standard-NPCs die beim ersten Start geladen werden.                        │
+-- │  Danach werden NPCs aus npcs_dynamic.json geladen (über das Admin-Panel).   │
+-- └──────────────────────────────────────────────────────────────────────────────┘
 
 NPCConfigs = {
     {
