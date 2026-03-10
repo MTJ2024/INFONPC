@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'MTJ2024'
 description 'Sichere serverseitige NPC-Resource mit clientseitiger Animation/Interaktion'
-version '2.0.0'
+version '2.1.0'
 
 ui_page 'html/index.html'
 

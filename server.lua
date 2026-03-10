@@ -16,8 +16,7 @@ local AdminGroups = {
 local function isPlayerAdmin(source)
     -- Einfache Version ohne Framework-Abhängigkeit
     -- Kann mit ESX/QBCore etc. erweitert werden
-    return IsPlayerAceAllowed(source, "npc.admin") or 
-           IsPlayerAceAllowed(source, "command")
+    return IsPlayerAceAllowed(source, "npc.admin")
 end
 
 -- NPCs aus Datei laden
@@ -110,8 +109,13 @@ RegisterNetEvent("safenpc:saveNPC", function(index, npcData)
         print("^2[NPC Manager]^7 Neuer NPC erstellt (ID: " .. #DynamicNPCs .. ")")
     else
         -- Bestehender NPC aktualisieren
-        DynamicNPCs[index + 1] = npcData
-        print("^2[NPC Manager]^7 NPC #" .. (index + 1) .. " aktualisiert")
+        local luaIndex = index + 1
+        if luaIndex < 1 or luaIndex > #DynamicNPCs then
+            print("^1[NPC Manager]^7 Ungültiger Index: " .. tostring(index))
+            return
+        end
+        DynamicNPCs[luaIndex] = npcData
+        print("^2[NPC Manager]^7 NPC #" .. luaIndex .. " aktualisiert")
     end
     
     -- Speichern und alle Clients aktualisieren
@@ -136,9 +140,10 @@ RegisterNetEvent("safenpc:deleteNPC", function(index)
         return
     end
     
-    if index ~= nil and DynamicNPCs[index + 1] then
-        table.remove(DynamicNPCs, index + 1)
-        print("^2[NPC Manager]^7 NPC #" .. (index + 1) .. " gelöscht")
+    local luaIndex = index ~= nil and (index + 1) or nil
+    if luaIndex and luaIndex >= 1 and luaIndex <= #DynamicNPCs then
+        table.remove(DynamicNPCs, luaIndex)
+        print("^2[NPC Manager]^7 NPC #" .. luaIndex .. " gelöscht")
         
         -- Speichern und alle Clients aktualisieren
         saveNPCsToFile()

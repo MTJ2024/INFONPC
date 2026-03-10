@@ -11,7 +11,10 @@
         <div class="container">
             <div class="header">
                 <h1>🎭 NPC Manager</h1>
-                <button class="close-btn" onclick="closeUI()">✕</button>
+                <div class="header-right">
+                    <span class="badge" id="npcCount">0 NPCs</span>
+                    <button class="close-btn" onclick="closeUI()">✕</button>
+                </div>
             </div>
             
             <div class="content">
@@ -27,74 +30,124 @@
                     <div class="section" id="editorSection" style="display: none;">
                         <h2 id="editorTitle">NPC Bearbeiten</h2>
                         
+                        <!-- Ped Model Dropdown -->
                         <div class="form-group">
-                            <label>Ped Model:</label>
-                            <input type="text" id="pedModel" placeholder="z.B. a_m_y_hipster_01">
+                            <label>👤 Ped Model:</label>
+                            <select id="pedModelSelect" onchange="onPedModelChange()">
+                                <option value="a_m_y_hipster_01">Hipster</option>
+                                <option value="a_m_m_indian_01">Inder</option>
+                                <option value="a_m_m_bevhills_02">Beverly Hills</option>
+                                <option value="s_m_m_pilot_01">Pilot</option>
+                                <option value="a_m_y_business_01">Geschäftsmann</option>
+                                <option value="a_m_y_surfer_01">Surfer</option>
+                                <option value="a_f_y_business_01">Geschäftsfrau</option>
+                                <option value="s_m_y_cop_01">Polizist</option>
+                                <option value="s_m_m_doctor_01">Arzt</option>
+                                <option value="s_m_y_fireman_01">Feuerwehrmann</option>
+                                <option value="u_m_y_tattoo_01">Tätowierer</option>
+                                <option value="s_f_y_bartender_01">Barkeeperin</option>
+                                <option value="__custom__">✏️ Eigenes Model...</option>
+                            </select>
+                            <input type="text" id="pedModelCustom" placeholder="z.B. a_m_y_hipster_01" style="display:none; margin-top:8px;">
                         </div>
                         
+                        <!-- Position -->
                         <div class="form-group">
-                            <label>Position:</label>
+                            <label>📍 Position:</label>
                             <div class="position-group">
-                                <input type="number" id="posX" placeholder="X" step="0.1">
-                                <input type="number" id="posY" placeholder="Y" step="0.1">
-                                <input type="number" id="posZ" placeholder="Z" step="0.1">
+                                <input type="number" id="posX" placeholder="X" step="0.01">
+                                <input type="number" id="posY" placeholder="Y" step="0.01">
+                                <input type="number" id="posZ" placeholder="Z" step="0.01">
                             </div>
-                            <button class="btn btn-secondary" onclick="getCurrentPosition()">📍 Aktuelle Position</button>
+                            <button class="btn btn-secondary btn-small" onclick="getCurrentPosition()">📍 Aktuelle Position</button>
                         </div>
                         
+                        <!-- Heading -->
                         <div class="form-group">
-                            <label>Heading:</label>
-                            <input type="number" id="heading" placeholder="0-360" step="0.1" min="0" max="360">
-                            <button class="btn btn-secondary" onclick="getCurrentHeading()">🧭 Aktuelles Heading</button>
+                            <label>🧭 Heading:</label>
+                            <div class="inline-row">
+                                <input type="number" id="heading" placeholder="0-360" step="0.1" min="0" max="360">
+                                <button class="btn btn-secondary btn-small" onclick="getCurrentHeading()">🧭 Aktuell</button>
+                            </div>
                         </div>
                         
+                        <!-- Scenario Dropdown -->
                         <div class="form-group">
-                            <label>Szenario:</label>
-                            <input type="text" id="scenario" placeholder="z.B. WORLD_HUMAN_CLIPBOARD">
-                        </div>
-                        
-                        <div class="form-group checkbox-group">
-                            <label>
-                                <input type="checkbox" id="enablePatrol">
-                                Patrol aktivieren
-                            </label>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Patrol Radius:</label>
-                            <input type="number" id="patrolRadius" placeholder="10.0" step="0.5" min="0">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Nachrichten (eine pro Zeile):</label>
-                            <textarea id="messages" rows="6" placeholder="Nachricht 1&#10;Nachricht 2&#10;Nachricht 3"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Text Schriftart:</label>
-                            <select id="textFont">
-                                <option value="pricedown">Pricedown (GTA-Style)</option>
-                                <option value="chalet">Chalet (Standard)</option>
-                                <option value="condensed">Condensed (Schmal)</option>
+                            <label>🎬 Szenario:</label>
+                            <select id="scenario">
+                                <option value="WORLD_HUMAN_CLIPBOARD">📋 Klemmbrett</option>
+                                <option value="WORLD_HUMAN_GUARD_STAND">🛡️ Wache stehen</option>
+                                <option value="WORLD_HUMAN_SMOKING">🚬 Rauchen</option>
+                                <option value="WORLD_HUMAN_DRINKING">🍺 Trinken</option>
+                                <option value="WORLD_HUMAN_AA_COFFEE">☕ Kaffee trinken</option>
+                                <option value="WORLD_HUMAN_STAND_MOBILE">📱 Am Handy</option>
+                                <option value="WORLD_HUMAN_HANG_OUT_STREET">🧍 Herumstehen</option>
+                                <option value="WORLD_HUMAN_LEANING">🏗️ Anlehnen</option>
+                                <option value="WORLD_HUMAN_BUM_STANDING">🧑 Bettler</option>
+                                <option value="WORLD_HUMAN_TOURIST_MAP">🗺️ Karte lesen</option>
                             </select>
                         </div>
                         
-                        <div class="form-group">
-                            <label>Text Farbe:</label>
-                            <select id="textColor">
-                                <option value="gold">Gold</option>
-                                <option value="weiss">Weiß</option>
-                                <option value="rot">Rot</option>
-                                <option value="gruen">Grün</option>
-                                <option value="blau">Blau</option>
-                            </select>
+                        <!-- Patrol -->
+                        <div class="form-row">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="enablePatrol">
+                                    🚶 Patrol aktivieren
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Radius (m):</label>
+                                <input type="number" id="patrolRadius" placeholder="10.0" step="0.5" min="0">
+                            </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label>Text Größe:</label>
-                            <input type="number" id="textScale" placeholder="0.968" step="0.01" min="0.3" max="2.0" value="0.968">
+                        <hr class="divider">
+                        
+                        <!-- TEXT STYLING SECTION -->
+                        <h3 class="section-title">✨ Text-Styling</h3>
+                        
+                        <div class="style-row">
+                            <div class="form-group">
+                                <label>🔤 Schriftart:</label>
+                                <select id="textFont" onchange="updatePreview()">
+                                    <option value="pricedown">Pricedown (GTA)</option>
+                                    <option value="chalet">Chalet (Standard)</option>
+                                    <option value="condensed">Condensed (Schmal)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>🎨 Farbe:</label>
+                                <select id="textColor" onchange="updatePreview()">
+                                    <option value="gold">🟡 Gold</option>
+                                    <option value="weiss">⚪ Weiß</option>
+                                    <option value="rot">🔴 Rot</option>
+                                    <option value="gruen">🟢 Grün</option>
+                                    <option value="blau">🔵 Blau</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>📏 Größe:</label>
+                                <input type="range" id="textScale" min="0.4" max="1.5" step="0.05" value="0.968" oninput="updatePreview()">
+                                <span class="scale-value" id="scaleValue">0.97</span>
+                            </div>
                         </div>
                         
+                        <!-- LIVE PREVIEW -->
+                        <div class="preview-box" id="previewBox">
+                            <div class="preview-label">Vorschau</div>
+                            <div class="preview-text" id="previewText">Willkommen, Bürger...</div>
+                        </div>
+                        
+                        <hr class="divider">
+                        
+                        <!-- Messages -->
+                        <div class="form-group">
+                            <label>💬 Nachrichten (eine pro Zeile):</label>
+                            <textarea id="messages" rows="5" placeholder="Nachricht 1&#10;Nachricht 2&#10;Nachricht 3" oninput="updatePreview()"></textarea>
+                        </div>
+                        
+                        <!-- Buttons -->
                         <div class="button-group">
                             <button class="btn btn-success" onclick="saveNPC()">💾 Speichern</button>
                             <button class="btn btn-danger" onclick="deleteNPC()" id="deleteBtn">🗑️ Löschen</button>
@@ -102,16 +155,39 @@
                         </div>
                     </div>
                     
+                    <!-- Welcome Screen -->
                     <div class="section" id="welcomeSection">
                         <div class="welcome">
-                            <h2>Willkommen beim NPC Manager</h2>
+                            <div class="welcome-icon">🎭</div>
+                            <h2>NPC Manager v2.1</h2>
                             <p>Wähle einen NPC aus der Liste oder erstelle einen neuen.</p>
-                            <ul>
-                                <li>✅ NPCs live erstellen und bearbeiten</li>
-                                <li>✅ Position und Heading einfach setzen</li>
-                                <li>✅ Patrol-Funktion konfigurieren</li>
-                                <li>✅ Nachrichten anpassen</li>
-                            </ul>
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <span class="feature-icon">✏️</span>
+                                    <span>NPCs live bearbeiten</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">📍</span>
+                                    <span>Position & Heading</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">🎨</span>
+                                    <span>Farben & Schriften</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">📏</span>
+                                    <span>Textgröße einstellen</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">🚶</span>
+                                    <span>Patrol konfigurieren</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">👁️</span>
+                                    <span>Live-Vorschau</span>
+                                </div>
+                            </div>
+                            <p class="shortcut-hint">Öffne mit <code>/npc</code> oder <code>/npc_info</code></p>
                         </div>
                     </div>
                 </div>

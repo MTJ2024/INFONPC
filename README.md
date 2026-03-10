@@ -142,5 +142,5 @@ Vollständige Liste: [GTA V Ped Models](https://wiki.rage.mp/index.php?title=Ped
 ## Credits
 
 - Author: MTJ2024
-- Version: 2.0.0
+- Version: 2.1.0
 - Mit UI Management System für Live-Bearbeitung
