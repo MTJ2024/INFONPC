@@ -91,6 +91,9 @@ function createNewNPC() {
     document.getElementById('enablePatrol').checked = false;
     document.getElementById('patrolRadius').value = '10.0';
     document.getElementById('messages').value = '';
+    document.getElementById('textFont').value = 'pricedown';
+    document.getElementById('textColor').value = 'gold';
+    document.getElementById('textScale').value = '0.968';
 }
 
 function editNPC(index) {
@@ -114,6 +117,9 @@ function editNPC(index) {
     document.getElementById('enablePatrol').checked = npc.enablePatrol || false;
     document.getElementById('patrolRadius').value = npc.patrolRadius || 10.0;
     document.getElementById('messages').value = (npc.messages || []).join('\n');
+    document.getElementById('textFont').value = npc.textFont || 'pricedown';
+    document.getElementById('textColor').value = npc.textColor || 'gold';
+    document.getElementById('textScale').value = npc.textScale || 0.968;
     
     renderNPCList();
 }
@@ -151,6 +157,10 @@ function saveNPC() {
         return;
     }
     
+    const textFont = document.getElementById('textFont').value || 'pricedown';
+    const textColor = document.getElementById('textColor').value || 'gold';
+    const textScale = parseFloat(document.getElementById('textScale').value) || 0.968;
+
     const npcData = {
         pedModel: pedModel,
         position: { x: posX, y: posY, z: posZ },
@@ -158,6 +168,9 @@ function saveNPC() {
         scenario: scenario || 'WORLD_HUMAN_CLIPBOARD',
         enablePatrol: enablePatrol,
         patrolRadius: patrolRadius || 10.0,
+        textFont: textFont,
+        textColor: textColor,
+        textScale: textScale,
         messages: messages
     };
     

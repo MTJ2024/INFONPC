@@ -70,6 +70,31 @@
                             <textarea id="messages" rows="6" placeholder="Nachricht 1&#10;Nachricht 2&#10;Nachricht 3"></textarea>
                         </div>
                         
+                        <div class="form-group">
+                            <label>Text Schriftart:</label>
+                            <select id="textFont">
+                                <option value="pricedown">Pricedown (GTA-Style)</option>
+                                <option value="chalet">Chalet (Standard)</option>
+                                <option value="condensed">Condensed (Schmal)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Text Farbe:</label>
+                            <select id="textColor">
+                                <option value="gold">Gold</option>
+                                <option value="weiss">Weiß</option>
+                                <option value="rot">Rot</option>
+                                <option value="gruen">Grün</option>
+                                <option value="blau">Blau</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Text Größe:</label>
+                            <input type="number" id="textScale" placeholder="0.968" step="0.01" min="0.3" max="2.0" value="0.968">
+                        </div>
+                        
                         <div class="button-group">
                             <button class="btn btn-success" onclick="saveNPC()">💾 Speichern</button>
                             <button class="btn btn-danger" onclick="deleteNPC()" id="deleteBtn">🗑️ Löschen</button>

@@ -96,6 +96,9 @@ RegisterNetEvent("safenpc:saveNPC", function(index, npcData)
                 patrolRadius = npc.patrolRadius,
                 enablePatrol = npc.enablePatrol,
                 scenario = npc.scenario,
+                textFont = npc.textFont,
+                textColor = npc.textColor,
+                textScale = npc.textScale,
                 messages = npc.messages
             })
         end

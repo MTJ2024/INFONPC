@@ -165,7 +165,10 @@ Citizen.CreateThread(function()
                         -- Interaktions-Range (< 3m)
                         if dist < 3.0 and not isInteracting then
                             sleep = 0 -- Schnelle Updates für Interaktion
-                            drawTextAbovePlayer(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726)
+                            local cfg = currentNPCConfigs[idx]
+                            local font = cfg and cfg.textFont or "pricedown"
+                            local color = cfg and cfg.textColor or "gold"
+                            drawTextAbovePlayer(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726, font, color)
                             if IsControlJustReleased(0, 38) then
                                 isInteracting = true
                                 TriggerServerEvent("safenpc:interact", idx)
@@ -190,33 +193,38 @@ RegisterNetEvent("safenpc:showDialog", function(npcData)
         isInteracting = false 
         return 
     end
-    displayMessagesAbovePlayer(npcData.messages, function() isInteracting = false end)
+    local textScale = npcData.textScale or 0.968
+    local textFont = npcData.textFont or "pricedown"
+    local textColor = npcData.textColor or "gold"
+    displayMessagesAbovePlayer(npcData.messages, textScale, textFont, textColor, function() isInteracting = false end)
 end)
 
-function drawTextAbovePlayer(entity, text, scale)
+function drawTextAbovePlayer(entity, text, scale, fontName, colorName)
     local entityCoords = GetEntityCoords(entity)
     local onScreen, _x, _y = World3dToScreen2d(entityCoords.x, entityCoords.y, entityCoords.z + 1.0)
     if onScreen then
-        SetTextFont(7)
+        local fontId = (TextFonts and TextFonts[fontName]) or 7
+        local color = (TextColors and TextColors[colorName]) or {255, 223, 0, 255}
+        SetTextFont(fontId)
         SetTextScale(scale, scale)
         SetTextCentre(true)
         SetTextEdge(2, 0, 0, 0, 255)
         SetTextOutline()
-        SetTextColour(255, 223, 0, 255)
+        SetTextColour(color[1], color[2], color[3], color[4])
         BeginTextCommandDisplayText("STRING")
         AddTextComponentSubstringPlayerName(text)
         EndTextCommandDisplayText(_x, _y)
     end
 end
 
-function displayMessagesAbovePlayer(messages, callback)
+function displayMessagesAbovePlayer(messages, scale, fontName, colorName, callback)
     Citizen.CreateThread(function()
         for _, message in ipairs(messages) do
             local startTime = GetGameTimer()
             local duration = 3000
             while GetGameTimer() - startTime < duration do
                 Citizen.Wait(0)
-                drawTextAbovePlayer(PlayerPedId(), message, 0.968)
+                drawTextAbovePlayer(PlayerPedId(), message, scale, fontName, colorName)
             end
         end
         if callback then callback() end
