@@ -24,30 +24,69 @@ RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
         if cfg.scenario then
             TaskStartScenarioInPlace(ped, cfg.scenario, 0, true)
         end
+        -- Nicht-Patrouille-NPCs einfrieren, damit sie nicht weglaufen
+        if not cfg.enablePatrol then
+            FreezeEntityPosition(ped, true)
+            SetPedKeepTask(ped, true)
+        end
         myNPCs[idx] = ped
-        -- Patrouille
+        -- Patrouille mit Radius-Begrenzung
         if cfg.enablePatrol and cfg.patrolRadius > 0 then
             Citizen.CreateThread(function()
                 while DoesEntityExist(ped) do
-                    local target = getRandomPointInRadius(cfg.position, cfg.patrolRadius)
+                    local pedCoords = GetEntityCoords(ped)
+                    local distFromCenter = #(pedCoords - cfg.position)
+
+                    -- NPC ist außerhalb des Radius -> sofort zurück zum Zentrum
+                    if distFromCenter > cfg.patrolRadius then
+                        ClearPedTasks(ped)
+                        TaskGoToCoordAnyMeans(ped, cfg.position.x, cfg.position.y, cfg.position.z, 1.0, 0, 0, 786603, 0)
+                        local returnSteps = 0
+                        while DoesEntityExist(ped) do
+                            Citizen.Wait(500)
+                            returnSteps = returnSteps + 1
+                            pedCoords = GetEntityCoords(ped)
+                            distFromCenter = #(pedCoords - cfg.position)
+                            if distFromCenter <= cfg.patrolRadius * 0.5 then
+                                break
+                            end
+                            -- Sicherheit: Wenn NPC zu lange draußen ist, teleportieren
+                            if returnSteps > 30 then
+                                SetEntityCoords(ped, cfg.position.x, cfg.position.y, cfg.position.z - 1.0, false, false, false, true)
+                                break
+                            end
+                        end
+                    end
+
+                    -- Ziel innerhalb 70% des Radius wählen um Überlaufen zu vermeiden
+                    local target = getRandomPointInRadius(cfg.position, cfg.patrolRadius * 0.7)
                     TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, 1.0, 0, 0, 786603, 0)
                     local steps, arrived = 0, false
                     while not arrived and DoesEntityExist(ped) do
                         Citizen.Wait(500)
                         steps = steps + 1
-                        local pedCoords = GetEntityCoords(ped)
+                        pedCoords = GetEntityCoords(ped)
                         local distance = #(pedCoords - target)
-                        if distance < 1.0 then
+                        distFromCenter = #(pedCoords - cfg.position)
+
+                        if distance < 1.5 then
                             arrived = true
-                        elseif steps > 50 then
-                            target = getRandomPointInRadius(cfg.position, cfg.patrolRadius)
-                            TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, 1.0, 0, 0, 786603, 0)
-                            steps = 0
+                        elseif distFromCenter > cfg.patrolRadius then
+                            -- NPC hat Radius verlassen, sofort abbrechen
+                            ClearPedTasks(ped)
+                            break
+                        elseif steps > 40 then
+                            ClearPedTasks(ped)
+                            break
                         end
                     end
                     if DoesEntityExist(ped) and cfg.scenario then
-                        TaskStartScenarioInPlace(ped, cfg.scenario, 0, true)
-                        Citizen.Wait(5000)
+                        pedCoords = GetEntityCoords(ped)
+                        distFromCenter = #(pedCoords - cfg.position)
+                        if distFromCenter <= cfg.patrolRadius then
+                            TaskStartScenarioInPlace(ped, cfg.scenario, 0, true)
+                            Citizen.Wait(math.random(3000, 6000))
+                        end
                     end
                 end
             end)
