@@ -1,6 +1,8 @@
 let currentNPCs = [];
 let selectedNPCIndex = null;
 let isEditMode = false;
+let toastTimer = null;
+let confirmCallback = null;
 
 // Color map for preview and list dots
 const COLOR_MAP = {
@@ -10,6 +12,42 @@ const COLOR_MAP = {
     gruen: '#32ff32',
     blau:  '#6496ff'
 };
+
+// ===== TOAST (ersetzt alert() — kein FiveM-Crash) =====
+function showToast(message, type) {
+    type = type || 'error';
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast toast-' + type;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() {
+        toast.style.animation = 'toastOut 0.3s ease forwards';
+        setTimeout(function() {
+            toast.className = 'toast hidden';
+            toast.style.animation = '';
+        }, 300);
+    }, 3000);
+}
+
+// ===== CONFIRM MODAL (ersetzt confirm() — kein FiveM-Crash) =====
+function showConfirm(message, onYes) {
+    var modal = document.getElementById('confirmModal');
+    var text = document.getElementById('confirmText');
+    text.textContent = message;
+    confirmCallback = onYes;
+    modal.classList.remove('hidden');
+}
+
+function onConfirmYes() {
+    document.getElementById('confirmModal').classList.add('hidden');
+    if (confirmCallback) confirmCallback();
+    confirmCallback = null;
+}
+
+function onConfirmNo() {
+    document.getElementById('confirmModal').classList.add('hidden');
+    confirmCallback = null;
+}
 
 // ===== NUI MESSAGE HANDLER =====
 window.addEventListener('message', function(event) {
@@ -212,17 +250,17 @@ function saveNPC() {
     var messagesText = document.getElementById('messages').value;
     
     if (!pedModel) {
-        alert('Bitte wähle ein Ped Model!');
+        showToast('⚠️ Bitte wähle ein Ped Model!', 'error');
         return;
     }
     if (isNaN(posX) || isNaN(posY) || isNaN(posZ)) {
-        alert('Bitte gib gültige Koordinaten ein!\nNutze den Button "Aktuelle Position".');
+        showToast('⚠️ Bitte gib gültige Koordinaten ein!\nNutze den Button "Aktuelle Position".', 'error');
         return;
     }
     
     var messages = messagesText.split('\n').filter(function(m) { return m.trim() !== ''; });
     if (messages.length === 0) {
-        alert('Bitte gib mindestens eine Nachricht ein!');
+        showToast('⚠️ Bitte gib mindestens eine Nachricht ein!', 'error');
         return;
     }
     
@@ -253,14 +291,16 @@ function saveNPC() {
 function deleteNPC() {
     if (selectedNPCIndex === null) return;
     
-    if (confirm('NPC #' + (selectedNPCIndex + 1) + ' wirklich löschen?')) {
+    showConfirm('NPC #' + (selectedNPCIndex + 1) + ' wirklich löschen?', function() {
         fetch('https://' + GetParentResourceName() + '/deleteNPC', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ index: selectedNPCIndex })
+        }).then(function() {
+            showToast('✅ NPC gelöscht!', 'success');
         });
         showWelcome();
-    }
+    });
 }
 
 function cancelEdit() {

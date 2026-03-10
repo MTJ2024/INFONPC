@@ -195,6 +195,21 @@
         </div>
     </div>
     
+    <!-- Toast Notification (ersetzt alert()) -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Confirm Modal (ersetzt confirm() — kein FiveM-Crash) -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-text" id="confirmText">Bist du sicher?</div>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" id="confirmYes" onclick="onConfirmYes()">Ja, löschen</button>
+                <button class="btn btn-secondary" id="confirmNo" onclick="onConfirmNo()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
