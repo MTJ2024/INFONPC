@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="npc-manager" class="hidden">
+        <div class="container">
+            <div class="header">
+                <h1>🎭 NPC Manager</h1>
+                <button class="close-btn" onclick="closeUI()">✕</button>
+            </div>
+            
+            <div class="content">
+                <div class="left-panel">
+                    <div class="section">
+                        <h2>NPC Liste</h2>
+                        <div class="npc-list" id="npcList"></div>
+                        <button class="btn btn-primary" onclick="createNewNPC()">+ Neuer NPC</button>
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="section" id="editorSection" style="display: none;">
+                        <h2 id="editorTitle">NPC Bearbeiten</h2>
+                        
+                        <div class="form-group">
+                            <label>Ped Model:</label>
+                            <input type="text" id="pedModel" placeholder="z.B. a_m_y_hipster_01">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Position:</label>
+                            <div class="position-group">
+                                <input type="number" id="posX" placeholder="X" step="0.1">
+                                <input type="number" id="posY" placeholder="Y" step="0.1">
+                                <input type="number" id="posZ" placeholder="Z" step="0.1">
+                            </div>
+                            <button class="btn btn-secondary" onclick="getCurrentPosition()">📍 Aktuelle Position</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Heading:</label>
+                            <input type="number" id="heading" placeholder="0-360" step="0.1" min="0" max="360">
+                            <button class="btn btn-secondary" onclick="getCurrentHeading()">🧭 Aktuelles Heading</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Szenario:</label>
+                            <input type="text" id="scenario" placeholder="z.B. WORLD_HUMAN_CLIPBOARD">
+                        </div>
+                        
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="enablePatrol">
+                                Patrol aktivieren
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Patrol Radius:</label>
+                            <input type="number" id="patrolRadius" placeholder="10.0" step="0.5" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nachrichten (eine pro Zeile):</label>
+                            <textarea id="messages" rows="6" placeholder="Nachricht 1&#10;Nachricht 2&#10;Nachricht 3"></textarea>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="btn btn-success" onclick="saveNPC()">💾 Speichern</button>
+                            <button class="btn btn-danger" onclick="deleteNPC()" id="deleteBtn">🗑️ Löschen</button>
+                            <button class="btn btn-secondary" onclick="cancelEdit()">Abbrechen</button>
+                        </div>
+                    </div>
+                    
+                    <div class="section" id="welcomeSection">
+                        <div class="welcome">
+                            <h2>Willkommen beim NPC Manager</h2>
+                            <p>Wähle einen NPC aus der Liste oder erstelle einen neuen.</p>
+                            <ul>
+                                <li>✅ NPCs live erstellen und bearbeiten</li>
+                                <li>✅ Position und Heading einfach setzen</li>
+                                <li>✅ Patrol-Funktion konfigurieren</li>
+                                <li>✅ Nachrichten anpassen</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
