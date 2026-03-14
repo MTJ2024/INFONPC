@@ -100,32 +100,100 @@ RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
             TaskStartScenarioInPlace(ped, cfg.scenario, 0, true)
         end
         myNPCs[idx] = ped
-        -- Patrouille
+        -- Intelligentes Patrol-System
         if cfg.enablePatrol and cfg.patrolRadius > 0 then
             Citizen.CreateThread(function()
                 local patrolSpeed = (Config and Config.PatrolSpeed) or 1.0
-                local patrolWait = (Config and Config.PatrolWaitTime) or 5000
-                local patrolMaxSteps = (Config and Config.PatrolMaxSteps) or 50
+                local idleChance = (Config and Config.PatrolIdleChance) or 70
+                local idleTimeMin = (Config and Config.PatrolIdleTimeMin) or 3000
+                local idleTimeMax = (Config and Config.PatrolIdleTimeMax) or 10000
+                local stuckInterval = (Config and Config.PatrolStuckCheckInterval) or 1500
+                local stuckThreshold = (Config and Config.PatrolStuckThreshold) or 0.3
+                local maxRetries = (Config and Config.PatrolStuckMaxRetries) or 3
+                local arrivalDist = (Config and Config.PatrolArrivalThreshold) or 2.0
+                local maxHeightDiff = (Config and Config.PatrolMaxHeightDiff) or 3.0
+                local idleScenarios = (Config and Config.PatrolIdleScenarios) or {
+                    "WORLD_HUMAN_STAND_MOBILE",
+                    "WORLD_HUMAN_SMOKING",
+                    "WORLD_HUMAN_HANG_OUT_STREET",
+                }
+
+                local stuckCount = 0
+
+                -- Kurze Startpause: NPC spielt zuerst sein Szenario
+                if cfg.scenario then
+                    Citizen.Wait(math.random(3000, 6000))
+                end
+
                 while DoesEntityExist(ped) do
-                    local target = getRandomPointInRadius(cfg.position, cfg.patrolRadius)
-                    TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, patrolSpeed, 0, 0, 786603, 0)
-                    local steps, arrived = 0, false
+                    -- 1) Sicheren Zielpunkt finden (Bodenhöhe geprüft)
+                    local target = findSafePatrolPoint(cfg.position, cfg.patrolRadius, maxHeightDiff)
+
+                    -- 2) NavMesh-Pathfinding (folgt dem Navigationsnetz, nicht durch Wände)
+                    ClearPedTasks(ped)
+                    TaskFollowNavMeshToCoord(ped, target.x, target.y, target.z, patrolSpeed, -1, 1.0, 0, 0.0)
+
+                    -- 3) Bewegung überwachen mit Stuck-Erkennung
+                    local arrived = false
+                    local stuckChecks = 0
+                    local lastPos = GetEntityCoords(ped)
+
                     while not arrived and DoesEntityExist(ped) do
-                        Citizen.Wait(500)
-                        steps = steps + 1
-                        local pedCoords = GetEntityCoords(ped)
-                        local distance = #(pedCoords - target)
-                        if distance < 1.0 then
+                        Citizen.Wait(stuckInterval)
+
+                        if not DoesEntityExist(ped) then break end
+
+                        local currentPos = GetEntityCoords(ped)
+                        local distToTarget = #(currentPos - vector3(target.x, target.y, target.z))
+                        local moved = #(currentPos - lastPos)
+
+                        -- Angekommen?
+                        if distToTarget < arrivalDist then
                             arrived = true
-                        elseif steps > patrolMaxSteps then
-                            target = getRandomPointInRadius(cfg.position, cfg.patrolRadius)
-                            TaskGoToCoordAnyMeans(ped, target.x, target.y, target.z, patrolSpeed, 0, 0, 786603, 0)
-                            steps = 0
+                            stuckCount = 0
+                        -- Stuck-Erkennung: NPC hat sich kaum bewegt
+                        elseif moved < stuckThreshold then
+                            stuckChecks = stuckChecks + 1
+                            if stuckChecks >= 2 then
+                                -- NPC steckt fest → sofort abbrechen
+                                stuckCount = stuckCount + 1
+                                ClearPedTasks(ped)
+                                if stuckCount >= maxRetries then
+                                    -- Hard Reset: Teleport zur Startposition
+                                    SetEntityCoords(ped, cfg.position.x, cfg.position.y, cfg.position.z - 1.0, false, false, false, true)
+                                    SetEntityHeading(ped, cfg.heading or 0.0)
+                                    stuckCount = 0
+                                    Citizen.Wait(1000)
+                                end
+                                break -- Neues Ziel wählen
+                            end
+                        else
+                            stuckChecks = 0 -- Bewegt sich → Stuck-Zähler zurücksetzen
                         end
+
+                        lastPos = currentPos
                     end
-                    if DoesEntityExist(ped) and cfg.scenario then
-                        TaskStartScenarioInPlace(ped, cfg.scenario, 0, true)
-                        Citizen.Wait(patrolWait)
+
+                    -- 4) Natürliches Idle-Verhalten am Zielpunkt
+                    if arrived and DoesEntityExist(ped) then
+                        ClearPedTasks(ped)
+
+                        -- Zufällige Idle-Animation (Handy, Rauchen, Stehen, etc.)
+                        if math.random(100) <= idleChance and #idleScenarios > 0 then
+                            local scenario = idleScenarios[math.random(#idleScenarios)]
+                            TaskStartScenarioInPlace(ped, scenario, 0, true)
+                            local waitTime = math.random(idleTimeMin, idleTimeMax)
+                            Citizen.Wait(waitTime)
+                            ClearPedTasks(ped)
+                        else
+                            -- Nur kurz stehen bleiben und umschauen
+                            local lookHeading = math.random(0, 360) + 0.0
+                            SetEntityHeading(ped, lookHeading)
+                            Citizen.Wait(math.random(1500, 4000))
+                        end
+                    else
+                        -- War stuck → kurze Pause vor erneutem Versuch
+                        Citizen.Wait(500)
                     end
                 end
             end)
@@ -134,12 +202,29 @@ RegisterNetEvent("safenpc:spawnAllNPCs", function(cfgs)
     end
 end)
 
-function getRandomPointInRadius(center, radius)
+-- Finde einen sicheren, begehbaren Punkt innerhalb des Patrol-Radius
+-- Prüft Bodenhöhe und Höhendifferenz zur Startposition
+function findSafePatrolPoint(center, radius, maxHeightDiff)
+    maxHeightDiff = maxHeightDiff or 3.0
+    for attempt = 1, 6 do
+        -- Zufälliger Punkt (15-90% des Radius: nicht zu nah am Zentrum, nicht am Rand)
+        local angle = math.random() * 2 * math.pi
+        local dist = radius * 0.15 + math.random() * radius * 0.75
+        local x = center.x + math.cos(angle) * dist
+        local y = center.y + math.sin(angle) * dist
+
+        -- Bodenhöhe ermitteln
+        local found, groundZ = GetGroundZFor_3dCoord(x, y, center.z + 50.0, false)
+        if found and groundZ > 0 then
+            -- Höhendifferenz prüfen (kein Abgrund/Dach)
+            if math.abs(groundZ - center.z) < maxHeightDiff then
+                return vector3(x, y, groundZ)
+            end
+        end
+    end
+    -- Fallback: leicht versetzte Position nahe Zentrum
     local angle = math.random() * 2 * math.pi
-    local distance = math.random() * radius
-    local offsetX = math.cos(angle) * distance
-    local offsetY = math.sin(angle) * distance
-    return vector3(center.x + offsetX, center.y + offsetY, center.z)
+    return vector3(center.x + math.cos(angle) * 2.0, center.y + math.sin(angle) * 2.0, center.z)
 end
 
 AddEventHandler("onClientResourceStart", function(res)

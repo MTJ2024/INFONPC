@@ -81,8 +81,39 @@ Config.DefaultDialogStyle = "panel"             -- Standard Dialog-Stil für neu
 Config.DefaultPatrolEnabled = false             -- Soll Patrol bei neuen NPCs aktiviert sein?
 Config.DefaultPatrolRadius = 10.0               -- Standard Patrol-Radius in Metern
 Config.PatrolSpeed = 1.0                        -- Laufgeschwindigkeit beim Patrouillieren
-Config.PatrolWaitTime = 5000                    -- Wartezeit am Zielpunkt in ms (5000 = 5 Sekunden)
-Config.PatrolMaxSteps = 50                      -- Max. Schritte bevor neues Ziel gewählt wird
+                                                -- 1.0 = normales Gehen, 2.0 = schnelles Gehen
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🧠  INTELLIGENTES PATROL-VERHALTEN                                         │
+-- │  NPCs verhalten sich natürlich: stehen bleiben, Handy checken, umschauen.   │
+-- │  Automatische Stuck-Erkennung verhindert gegen Wände laufen.                │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+Config.PatrolIdleChance = 70                    -- % Wahrscheinlichkeit für Idle-Animation nach Ankunft
+                                                -- 70 = 70% Chance auf Handy/Rauchen/etc., 30% nur kurz stehen
+
+Config.PatrolIdleTimeMin = 3000                 -- Minimale Idle-Zeit in ms (3000 = 3 Sek.)
+Config.PatrolIdleTimeMax = 10000                -- Maximale Idle-Zeit in ms (10000 = 10 Sek.)
+
+Config.PatrolStuckCheckInterval = 1500          -- Wie oft Stuck-Prüfung (ms). 1500 = alle 1.5 Sek.
+Config.PatrolStuckThreshold = 0.3               -- Min. Meter die NPC sich bewegen muss pro Check
+                                                -- Unter 0.3m = NPC steckt fest → sofort Richtungswechsel
+
+Config.PatrolStuckMaxRetries = 3                -- Nach X fehlgeschlagenen Versuchen: Reset zur Startposition
+                                                -- Verhindert endloses Steckenbleiben
+
+Config.PatrolArrivalThreshold = 2.0             -- Entfernung in Metern ab der NPC als "angekommen" gilt
+Config.PatrolMaxHeightDiff = 3.0                -- Max. Höhendifferenz in Metern zum Startpunkt
+                                                -- Verhindert dass NPCs in Abgründe/auf Dächer laufen
+
+Config.PatrolIdleScenarios = {                  -- Zufällige Animationen zwischen Wanderungen
+    "WORLD_HUMAN_STAND_MOBILE",                 -- Am Handy schauen
+    "WORLD_HUMAN_SMOKING",                      -- Rauchen
+    "WORLD_HUMAN_AA_COFFEE",                    -- Kaffee trinken
+    "WORLD_HUMAN_HANG_OUT_STREET",              -- Locker herumstehen
+    "WORLD_HUMAN_CLIPBOARD",                    -- Klemmbrett lesen
+    "WORLD_HUMAN_TOURIST_MAP",                  -- Karte anschauen
+}
 
 -- ┌──────────────────────────────────────────────────────────────────────────────┐
 -- │  🔤  SCHRIFTARTEN                                                           │
