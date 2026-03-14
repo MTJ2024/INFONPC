@@ -3,6 +3,7 @@ let selectedNPCIndex = null;
 let isEditMode = false;
 let toastTimer = null;
 let confirmCallback = null;
+let infoPanelOpen = false;
 
 // Color map for preview and list dots
 const COLOR_MAP = {
@@ -71,15 +72,114 @@ window.addEventListener('message', function(event) {
         if (data.heading !== undefined) {
             document.getElementById('heading').value = data.heading.toFixed(4);
         }
+    } else if (data.action === 'showInfoPanel') {
+        showInfoPanel(data.npcData);
+    } else if (data.action === 'hideInfoPanel') {
+        hideInfoPanel();
     }
 });
 
 // ESC to close
 document.addEventListener('keyup', function(event) {
     if (event.key === 'Escape') {
-        closeUI();
+        if (infoPanelOpen) {
+            hideInfoPanel();
+            fetch('https://' + GetParentResourceName() + '/closeInfoPanel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+        } else {
+            closeUI();
+        }
     }
 });
+
+// ===== NPC INFO PANEL (Professioneller Dialog) =====
+function showInfoPanel(npcData) {
+    if (!npcData) return;
+    infoPanelOpen = true;
+    
+    var panel = document.getElementById('npcInfoPanel');
+    var headerEl = document.getElementById('infoPanelHeader');
+    var subEl = document.getElementById('infoPanelSubheader');
+    var bodyEl = document.getElementById('infoPanelBody');
+    var iconEl = document.getElementById('infoPanelIcon');
+    
+    // Header
+    var header = npcData.header || 'Information';
+    headerEl.textContent = header;
+    
+    // Icon aus dem Header extrahieren (erstes Emoji) oder Standard
+    var emojiMatch = header.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u);
+    if (emojiMatch) {
+        iconEl.textContent = emojiMatch[0];
+        headerEl.textContent = header.replace(emojiMatch[0], '').trim();
+    } else {
+        iconEl.textContent = 'ℹ️';
+    }
+    
+    // Subheader
+    if (npcData.subheader) {
+        subEl.textContent = npcData.subheader;
+        subEl.style.display = 'block';
+    } else {
+        subEl.style.display = 'none';
+    }
+    
+    // Accent color based on textColor
+    var accentColor = '#f59e0b';
+    var colorMap = {
+        gold: '#f59e0b', weiss: '#e2e8f0', rot: '#ef4444',
+        gruen: '#22c55e', blau: '#3b82f6'
+    };
+    if (npcData.textColor && colorMap[npcData.textColor]) {
+        accentColor = colorMap[npcData.textColor];
+    }
+    
+    var accentEl = panel.querySelector('.npc-info-accent');
+    accentEl.style.background = 'linear-gradient(90deg, ' + accentColor + ', ' + accentColor + 'cc, ' + accentColor + ')';
+    
+    iconEl.style.background = 'rgba(' + hexToRgb(accentColor) + ', 0.1)';
+    iconEl.style.borderColor = 'rgba(' + hexToRgb(accentColor) + ', 0.2)';
+    
+    // Messages
+    bodyEl.innerHTML = '';
+    var messages = npcData.messages || [];
+    messages.forEach(function(msg, i) {
+        var row = document.createElement('div');
+        row.className = 'npc-info-message';
+        row.style.animationDelay = (i * 0.08) + 's';
+        
+        var bullet = document.createElement('div');
+        bullet.className = 'npc-info-bullet';
+        bullet.style.background = accentColor;
+        bullet.style.boxShadow = '0 0 8px ' + accentColor + '4d';
+        
+        var text = document.createElement('div');
+        text.className = 'npc-info-msg-text';
+        text.textContent = msg;
+        
+        row.appendChild(bullet);
+        row.appendChild(text);
+        bodyEl.appendChild(row);
+    });
+    
+    panel.classList.remove('hidden');
+}
+
+function hideInfoPanel() {
+    infoPanelOpen = false;
+    document.getElementById('npcInfoPanel').classList.add('hidden');
+}
+
+function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+    return r + ', ' + g + ', ' + b;
+}
 
 // ===== UI OPEN/CLOSE =====
 function openUI(npcs) {
@@ -122,20 +222,35 @@ function renderNPCList() {
         dot.className = 'color-dot ' + (npc.textColor || 'gold');
         header.appendChild(dot);
         
+        // Style badge
+        var styleBadge = document.createElement('span');
+        styleBadge.className = 'style-badge';
+        styleBadge.textContent = (npc.dialogStyle === 'panel') ? '🪟' : '📝';
+        header.appendChild(styleBadge);
+        
         var title = document.createElement('span');
-        title.textContent = 'NPC #' + (index + 1);
+        var maxListLen = 20;
+        title.textContent = npc.header ? npc.header.substring(0, maxListLen) : ('NPC #' + (index + 1));
         header.appendChild(title);
         
         var info = document.createElement('div');
         info.className = 'npc-item-info';
         var msgCount = (npc.messages && npc.messages.length) || 0;
-        var font = npc.textFont || 'pricedown';
-        info.textContent = (npc.pedModel || '?') + ' | ' + msgCount + ' Nachr. | ' + font;
+        var style = npc.dialogStyle === 'panel' ? 'Panel' : 'Klassisch';
+        info.textContent = (npc.pedModel || '?') + ' | ' + msgCount + ' Nachr. | ' + style;
         
         item.appendChild(header);
         item.appendChild(info);
         listContainer.appendChild(item);
     });
+}
+
+// ===== DIALOG STYLE TOGGLE =====
+function onDialogStyleChange() {
+    var style = document.getElementById('dialogStyle').value;
+    var panelFields = document.getElementById('panelFields');
+    panelFields.style.display = (style === 'panel') ? 'block' : 'none';
+    updatePreview();
 }
 
 // ===== PED MODEL DROPDOWN =====
@@ -188,7 +303,12 @@ function createNewNPC() {
     document.getElementById('editorSection').style.display = 'block';
     document.getElementById('welcomeSection').style.display = 'none';
     
-    setPedModel('a_m_y_hipster_01');
+    document.getElementById('dialogStyle').value = 'panel';
+    document.getElementById('npcHeader').value = '';
+    document.getElementById('npcSubheader').value = '';
+    onDialogStyleChange();
+    
+    setPedModel('a_f_y_business_01');
     document.getElementById('posX').value = '';
     document.getElementById('posY').value = '';
     document.getElementById('posZ').value = '';
@@ -212,12 +332,17 @@ function editNPC(index) {
     
     var npc = currentNPCs[index];
     
-    document.getElementById('editorTitle').textContent = 'NPC #' + (index + 1) + ' bearbeiten';
+    document.getElementById('editorTitle').textContent = npc.header ? npc.header.substring(0, 30) + (npc.header.length > 30 ? '…' : '') : ('NPC #' + (index + 1) + ' bearbeiten');
     document.getElementById('deleteBtn').style.display = 'inline-block';
     document.getElementById('editorSection').style.display = 'block';
     document.getElementById('welcomeSection').style.display = 'none';
     
-    setPedModel(npc.pedModel || 'a_m_y_hipster_01');
+    document.getElementById('dialogStyle').value = npc.dialogStyle || 'classic';
+    document.getElementById('npcHeader').value = npc.header || '';
+    document.getElementById('npcSubheader').value = npc.subheader || '';
+    onDialogStyleChange();
+    
+    setPedModel(npc.pedModel || 'a_f_y_business_01');
     document.getElementById('posX').value = npc.position ? (npc.position.x || '') : '';
     document.getElementById('posY').value = npc.position ? (npc.position.y || '') : '';
     document.getElementById('posZ').value = npc.position ? (npc.position.z || '') : '';
@@ -248,6 +373,9 @@ function saveNPC() {
     var textColor = document.getElementById('textColor').value || 'gold';
     var textScale = parseFloat(document.getElementById('textScale').value) || 0.968;
     var messagesText = document.getElementById('messages').value;
+    var dialogStyle = document.getElementById('dialogStyle').value || 'classic';
+    var npcHeader = document.getElementById('npcHeader').value.trim();
+    var npcSubheader = document.getElementById('npcSubheader').value.trim();
     
     if (!pedModel) {
         showToast('⚠️ Bitte wähle ein Ped Model!', 'error');
@@ -274,6 +402,9 @@ function saveNPC() {
         textFont: textFont,
         textColor: textColor,
         textScale: textScale,
+        dialogStyle: dialogStyle,
+        header: npcHeader,
+        subheader: npcSubheader,
         messages: messages
     };
     
@@ -291,7 +422,8 @@ function saveNPC() {
 function deleteNPC() {
     if (selectedNPCIndex === null) return;
     
-    showConfirm('NPC #' + (selectedNPCIndex + 1) + ' wirklich löschen?', function() {
+    var label = currentNPCs[selectedNPCIndex].header || ('NPC #' + (selectedNPCIndex + 1));
+    showConfirm(label + ' wirklich löschen?', function() {
         fetch('https://' + GetParentResourceName() + '/deleteNPC', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -319,7 +451,10 @@ function updatePreview() {
     var font = document.getElementById('textFont').value || 'pricedown';
     var color = document.getElementById('textColor').value || 'gold';
     var scale = parseFloat(document.getElementById('textScale').value) || 0.968;
+    var dialogStyle = document.getElementById('dialogStyle').value || 'classic';
     
+    var previewClassic = document.getElementById('previewClassic');
+    var previewPanel = document.getElementById('previewPanel');
     var previewEl = document.getElementById('previewText');
     var scaleEl = document.getElementById('scaleValue');
     
@@ -331,10 +466,19 @@ function updatePreview() {
         if (lines.length > 0) firstLine = lines[0];
     }
     
-    // Apply CSS classes for font + color
-    previewEl.className = 'preview-text font-' + font + ' color-' + color;
-    previewEl.style.fontSize = Math.round(scale * 22) + 'px';
-    previewEl.textContent = firstLine;
+    if (dialogStyle === 'panel') {
+        previewClassic.style.display = 'none';
+        previewPanel.style.display = 'block';
+        document.getElementById('previewPanelHeader').textContent = document.getElementById('npcHeader').value || 'Header...';
+        document.getElementById('previewPanelSub').textContent = document.getElementById('npcSubheader').value || 'Untertitel...';
+        document.getElementById('previewPanelMsg').textContent = firstLine;
+    } else {
+        previewClassic.style.display = 'block';
+        previewPanel.style.display = 'none';
+        previewEl.className = 'preview-text font-' + font + ' color-' + color;
+        previewEl.style.fontSize = Math.round(scale * 22) + 'px';
+        previewEl.textContent = firstLine;
+    }
     
     if (scaleEl) scaleEl.textContent = scale.toFixed(2);
 }

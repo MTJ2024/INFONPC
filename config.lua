@@ -60,6 +60,17 @@ Config.MessageDuration = 3000                   -- Wie lange jede Nachricht ange
                                                 -- 3000 = 3 Sekunden pro Nachricht
 
 -- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🪟  DIALOG-STIL                                                            │
+-- │  Wie werden NPC-Nachrichten angezeigt?                                      │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+Config.DefaultDialogStyle = "panel"             -- Standard Dialog-Stil für neue NPCs
+                                                -- "classic" = Schwebender Text über dem NPC (alt)
+                                                -- "panel"   = Professionelles Info-Panel (NEU!)
+                                                --              mit Header, Untertitel & formatiertem Text
+                                                --              Perfekt für Autohäuser, Shops, etc.
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
 -- │  🚶  PATROL STANDARDWERTE                                                   │
 -- │  Werden für neue NPCs als Default verwendet.                                │
 -- └──────────────────────────────────────────────────────────────────────────────┘
@@ -118,18 +129,43 @@ ScenarioList = {
 -- └──────────────────────────────────────────────────────────────────────────────┘
 
 PedModels = {
+    -- 👩 Frauen (Business & Luxus)
+    ["a_f_y_business_01"]   = "Geschäftsfrau (Blazer)",     -- Frau im dunklen Blazer
+    ["a_f_y_business_02"]   = "Geschäftsfrau (Elegant)",    -- Elegante Business-Frau
+    ["a_f_y_business_03"]   = "Geschäftsfrau (Modern)",     -- Moderne Business-Frau
+    ["a_f_y_business_04"]   = "Geschäftsfrau (Chic)",       -- Schicke Business-Frau
+    ["a_f_y_bevhills_01"]   = "Beverly Hills Lady",         -- Reiche Frau, elegant
+    ["a_f_y_bevhills_02"]   = "Beverly Hills Dame",         -- Reiche Dame, luxuriös
+    ["a_f_y_bevhills_03"]   = "Beverly Hills Schönheit",    -- Glamouröse Frau
+    ["a_f_y_bevhills_04"]   = "Beverly Hills Stil",         -- Stilvolle Dame
+    ["a_f_m_bevhills_01"]   = "Reife Beverly Hills",        -- Reife elegante Frau
+    ["a_f_m_bevhills_02"]   = "Nobelfrau",                  -- Wohlhabende Dame
+    ["a_f_y_vinewood_01"]   = "Vinewood Schauspielerin",    -- Vinewood-Frau
+    ["a_f_y_vinewood_02"]   = "Vinewood Stylistin",         -- Vinewood-Style
+    ["a_f_y_vinewood_03"]   = "Vinewood Eleganz",           -- Vinewood-Elegant
+    ["a_f_y_vinewood_04"]   = "Vinewood Glamour",           -- Vinewood-Glamourös
+    ["s_f_y_bartender_01"]  = "Barkeeperin",                -- Barkeeperin
+    ["a_f_y_fitness_01"]    = "Fitness-Frau",               -- Sportliche Frau
+    ["a_f_y_fitness_02"]    = "Fitness-Lady",               -- Sportliche Dame
+    ["a_f_y_hipster_01"]    = "Hipster-Frau",               -- Junge Frau, hip
+    -- 👔 Männer (Business & Luxus)
+    ["a_m_y_business_01"]   = "Geschäftsmann (Anzug)",      -- Mann im Anzug
+    ["a_m_y_business_02"]   = "Geschäftsmann (Modern)",     -- Moderner Geschäftsmann
+    ["a_m_y_business_03"]   = "Geschäftsmann (Elegant)",    -- Eleganter Geschäftsmann
+    ["a_m_m_bevhills_01"]   = "Beverly Hills Mann",         -- Reicher Mann
+    ["a_m_m_bevhills_02"]   = "Beverly Hills Gentleman",    -- Gentleman
+    ["a_m_y_bevhills_01"]   = "Junger Beverly Hills",       -- Junger reicher Mann
+    ["a_m_y_bevhills_02"]   = "Beverly Hills Dresscode",    -- Schicker junger Mann
+    ["a_m_y_vinewood_01"]   = "Vinewood Star",              -- Vinewood-Mann
+    -- 🎖️ Berufe & Andere
     ["a_m_y_hipster_01"]    = "Hipster",                    -- Junger Mann mit Bart
     ["a_m_m_indian_01"]     = "Inder",                      -- Indischer Mann
-    ["a_m_m_bevhills_02"]   = "Beverly Hills",              -- Reicher Mann
     ["s_m_m_pilot_01"]      = "Pilot",                      -- Flugzeugpilot
-    ["a_m_y_business_01"]   = "Geschäftsmann",              -- Mann im Anzug
     ["a_m_y_surfer_01"]     = "Surfer",                     -- Surfer-Typ
-    ["a_f_y_business_01"]   = "Geschäftsfrau",              -- Frau im Blazer
     ["s_m_y_cop_01"]        = "Polizist",                   -- LSPD Beamter
     ["s_m_m_doctor_01"]     = "Arzt",                       -- Arzt in Weiß
     ["s_m_y_fireman_01"]    = "Feuerwehrmann",              -- Feuerwehrmann
     ["u_m_y_tattoo_01"]     = "Tätowierer",                 -- Tattoo-Künstler
-    ["s_f_y_bartender_01"]  = "Barkeeperin",                -- Barkeeperin
 }
 
 -- ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -149,6 +185,9 @@ NPCConfigs = {
         textFont = "pricedown",
         textColor = "gold",
         textScale = 0.968,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Willkommen, Bürger...",
             "Wie ich sehe, bist du hier, um Geld zu machen!",
@@ -168,6 +207,9 @@ NPCConfigs = {
         textFont = "chalet",
         textColor = "weiss",
         textScale = 0.80,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Willkommen, Bürger...",
             "Wie ich sehe, bist du hier, um Geld zu machen!",
@@ -188,6 +230,9 @@ NPCConfigs = {
         textFont = "condensed",
         textColor = "gruen",
         textScale = 0.85,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Willkommen, Bürger...",
             "Wie ich sehe, bist du hier, um Geld zu machen!",
@@ -206,6 +251,9 @@ NPCConfigs = {
         textFont = "pricedown",
         textColor = "rot",
         textScale = 0.90,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Hallo Bürger...",
             "Willkommen auf Petros Weinfelder!",
@@ -226,6 +274,9 @@ NPCConfigs = {
         textFont = "chalet",
         textColor = "blau",
         textScale = 0.85,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Hallo Bienenfreund...",
             "Willkommen auf Peters Bienenstock!",
@@ -247,6 +298,9 @@ NPCConfigs = {
         textFont = "condensed",
         textColor = "gold",
         textScale = 0.95,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Hallo Kartoffelfreund...",
             "Willkommen auf Manfreds Kartoffelfeld!",
@@ -268,6 +322,9 @@ NPCConfigs = {
         textFont = "pricedown",
         textColor = "gruen",
         textScale = 1.0,
+        dialogStyle = "classic",
+        header = "",
+        subheader = "",
         messages = {
             "Willkommen in GreenZone420!",
             "Hier startet dein Abenteuer in einer pulsierenden Stadt,",
@@ -280,19 +337,22 @@ NPCConfigs = {
     {
         position = vector3(50.0846, -1712.6447, 29.3088),
         heading = 226.3262,
-        pedModel = "a_m_y_business_01",
-        patrolRadius = 15.0,
-        enablePatrol = true,
+        pedModel = "a_f_y_business_01",
+        patrolRadius = 0,
+        enablePatrol = false,
         scenario = "WORLD_HUMAN_CLIPBOARD",
         textFont = "chalet",
-        textColor = "weiss",
+        textColor = "gold",
         textScale = 0.90,
+        dialogStyle = "panel",
+        header = "🏎️ Luxus Autohaus Prestige",
+        subheader = "Premium Fahrzeuge — Exklusiver Service",
         messages = {
-            "Willkommen bei STO Motors!",
-            "Hier finden Sie die besten LKWs der Stadt.",
-            "Unsere Fahrzeuge sind bereit für Besichtigungen,",
-            "und Sie können sie auch gerne Probe fahren!",
-            "Viel Spaß bei STO Motors!"
+            "Herzlich willkommen bei Prestige Motors!",
+            "Wir bieten Ihnen die exklusivsten Fahrzeuge der Stadt.",
+            "Von eleganten Sportwagen bis hin zu luxuriösen Limousinen.",
+            "Vereinbaren Sie eine Probefahrt oder lassen Sie sich beraten.",
+            "Unser Team steht Ihnen jederzeit zur Verfügung!",
         }
     }
 }

@@ -30,25 +30,76 @@
                     <div class="section" id="editorSection" style="display: none;">
                         <h2 id="editorTitle">NPC Bearbeiten</h2>
                         
+                        <!-- Dialog Style -->
+                        <div class="form-group">
+                            <label>🪟 Dialog-Stil:</label>
+                            <select id="dialogStyle" onchange="onDialogStyleChange()">
+                                <option value="classic">📝 Klassisch (Schwebender Text)</option>
+                                <option value="panel">🪟 Info-Panel (Professionell)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Header (nur bei panel) -->
+                        <div id="panelFields">
+                            <div class="form-group">
+                                <label>📰 Header / Titel:</label>
+                                <input type="text" id="npcHeader" placeholder="z.B. 🏎️ Luxus Autohaus Prestige" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>📎 Untertitel:</label>
+                                <input type="text" id="npcSubheader" placeholder="z.B. Premium Fahrzeuge — Exklusiver Service" oninput="updatePreview()">
+                            </div>
+                        </div>
+                        
                         <!-- Ped Model Dropdown -->
                         <div class="form-group">
                             <label>👤 Ped Model:</label>
                             <select id="pedModelSelect" onchange="onPedModelChange()">
-                                <option value="a_m_y_hipster_01">Hipster</option>
-                                <option value="a_m_m_indian_01">Inder</option>
-                                <option value="a_m_m_bevhills_02">Beverly Hills</option>
-                                <option value="s_m_m_pilot_01">Pilot</option>
-                                <option value="a_m_y_business_01">Geschäftsmann</option>
-                                <option value="a_m_y_surfer_01">Surfer</option>
-                                <option value="a_f_y_business_01">Geschäftsfrau</option>
-                                <option value="s_m_y_cop_01">Polizist</option>
-                                <option value="s_m_m_doctor_01">Arzt</option>
-                                <option value="s_m_y_fireman_01">Feuerwehrmann</option>
-                                <option value="u_m_y_tattoo_01">Tätowierer</option>
-                                <option value="s_f_y_bartender_01">Barkeeperin</option>
-                                <option value="__custom__">✏️ Eigenes Model...</option>
+                                <optgroup label="👩 Frauen (Business &amp; Luxus)">
+                                    <option value="a_f_y_business_01">Geschäftsfrau (Blazer)</option>
+                                    <option value="a_f_y_business_02">Geschäftsfrau (Elegant)</option>
+                                    <option value="a_f_y_business_03">Geschäftsfrau (Modern)</option>
+                                    <option value="a_f_y_business_04">Geschäftsfrau (Chic)</option>
+                                    <option value="a_f_y_bevhills_01">Beverly Hills Lady</option>
+                                    <option value="a_f_y_bevhills_02">Beverly Hills Dame</option>
+                                    <option value="a_f_y_bevhills_03">Beverly Hills Schönheit</option>
+                                    <option value="a_f_y_bevhills_04">Beverly Hills Stil</option>
+                                    <option value="a_f_m_bevhills_01">Reife Beverly Hills</option>
+                                    <option value="a_f_m_bevhills_02">Nobelfrau</option>
+                                    <option value="a_f_y_vinewood_01">Vinewood Schauspielerin</option>
+                                    <option value="a_f_y_vinewood_02">Vinewood Stylistin</option>
+                                    <option value="a_f_y_vinewood_03">Vinewood Eleganz</option>
+                                    <option value="a_f_y_vinewood_04">Vinewood Glamour</option>
+                                    <option value="s_f_y_bartender_01">Barkeeperin</option>
+                                    <option value="a_f_y_fitness_01">Fitness-Frau</option>
+                                    <option value="a_f_y_fitness_02">Fitness-Lady</option>
+                                    <option value="a_f_y_hipster_01">Hipster-Frau</option>
+                                </optgroup>
+                                <optgroup label="👔 Männer (Business &amp; Luxus)">
+                                    <option value="a_m_y_business_01">Geschäftsmann (Anzug)</option>
+                                    <option value="a_m_y_business_02">Geschäftsmann (Modern)</option>
+                                    <option value="a_m_y_business_03">Geschäftsmann (Elegant)</option>
+                                    <option value="a_m_m_bevhills_01">Beverly Hills Mann</option>
+                                    <option value="a_m_m_bevhills_02">Beverly Hills Gentleman</option>
+                                    <option value="a_m_y_bevhills_01">Junger Beverly Hills</option>
+                                    <option value="a_m_y_bevhills_02">Beverly Hills Dresscode</option>
+                                    <option value="a_m_y_vinewood_01">Vinewood Star</option>
+                                </optgroup>
+                                <optgroup label="🎖️ Berufe &amp; Andere">
+                                    <option value="a_m_y_hipster_01">Hipster</option>
+                                    <option value="a_m_m_indian_01">Inder</option>
+                                    <option value="s_m_m_pilot_01">Pilot</option>
+                                    <option value="a_m_y_surfer_01">Surfer</option>
+                                    <option value="s_m_y_cop_01">Polizist</option>
+                                    <option value="s_m_m_doctor_01">Arzt</option>
+                                    <option value="s_m_y_fireman_01">Feuerwehrmann</option>
+                                    <option value="u_m_y_tattoo_01">Tätowierer</option>
+                                </optgroup>
+                                <optgroup label="✏️ Eigenes Model">
+                                    <option value="__custom__">✏️ Eigenes Model...</option>
+                                </optgroup>
                             </select>
-                            <input type="text" id="pedModelCustom" placeholder="z.B. a_m_y_hipster_01" style="display:none; margin-top:8px;">
+                            <input type="text" id="pedModelCustom" placeholder="z.B. a_f_y_business_01" style="display:none; margin-top:8px;">
                         </div>
                         
                         <!-- Position -->
@@ -136,7 +187,16 @@
                         <!-- LIVE PREVIEW -->
                         <div class="preview-box" id="previewBox">
                             <div class="preview-label">Vorschau</div>
-                            <div class="preview-text" id="previewText">Willkommen, Bürger...</div>
+                            <div id="previewClassic">
+                                <div class="preview-text" id="previewText">Willkommen, Bürger...</div>
+                            </div>
+                            <div id="previewPanel" style="display:none; width:100%;">
+                                <div class="panel-preview-mini">
+                                    <div class="panel-preview-header" id="previewPanelHeader">🏎️ Luxus Autohaus</div>
+                                    <div class="panel-preview-sub" id="previewPanelSub">Premium Service</div>
+                                    <div class="panel-preview-msg" id="previewPanelMsg">Willkommen bei uns...</div>
+                                </div>
+                            </div>
                         </div>
                         
                         <hr class="divider">
@@ -159,28 +219,28 @@
                     <div class="section" id="welcomeSection">
                         <div class="welcome">
                             <div class="welcome-icon">🎭</div>
-                            <h2>NPC Manager v2.1</h2>
+                            <h2>NPC Manager v3.0</h2>
                             <p>Wähle einen NPC aus der Liste oder erstelle einen neuen.</p>
                             <div class="feature-grid">
                                 <div class="feature-card">
-                                    <span class="feature-icon">✏️</span>
-                                    <span>NPCs live bearbeiten</span>
+                                    <span class="feature-icon">🪟</span>
+                                    <span>Info-Panel Dialog</span>
                                 </div>
                                 <div class="feature-card">
-                                    <span class="feature-icon">📍</span>
-                                    <span>Position & Heading</span>
+                                    <span class="feature-icon">📰</span>
+                                    <span>Header & Untertitel</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">👩</span>
+                                    <span>30+ Ped-Modelle</span>
                                 </div>
                                 <div class="feature-card">
                                     <span class="feature-icon">🎨</span>
                                     <span>Farben & Schriften</span>
                                 </div>
                                 <div class="feature-card">
-                                    <span class="feature-icon">📏</span>
-                                    <span>Textgröße einstellen</span>
-                                </div>
-                                <div class="feature-card">
                                     <span class="feature-icon">🚶</span>
-                                    <span>Patrol konfigurieren</span>
+                                    <span>Patrol System</span>
                                 </div>
                                 <div class="feature-card">
                                     <span class="feature-icon">👁️</span>
@@ -191,6 +251,26 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== NPC INFO PANEL DIALOG (wird bei Interaktion angezeigt) ===== -->
+    <div id="npcInfoPanel" class="npc-info-overlay hidden">
+        <div class="npc-info-panel">
+            <div class="npc-info-accent"></div>
+            <div class="npc-info-header">
+                <div class="npc-info-icon" id="infoPanelIcon">ℹ️</div>
+                <div class="npc-info-titles">
+                    <h2 id="infoPanelHeader">Information</h2>
+                    <p id="infoPanelSubheader"></p>
+                </div>
+            </div>
+            <div class="npc-info-divider"></div>
+            <div class="npc-info-body" id="infoPanelBody">
+            </div>
+            <div class="npc-info-footer">
+                <span class="npc-info-hint">Drücke <kbd>ESC</kbd> zum Schließen</span>
             </div>
         </div>
     </div>

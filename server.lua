@@ -117,6 +117,9 @@ RegisterNetEvent("safenpc:saveNPC", function(index, npcData)
                 textFont = npc.textFont,
                 textColor = npc.textColor,
                 textScale = npc.textScale,
+                dialogStyle = npc.dialogStyle,
+                header = npc.header,
+                subheader = npc.subheader,
                 messages = npc.messages
             })
         end

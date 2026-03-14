@@ -199,10 +199,30 @@ RegisterNetEvent("safenpc:showDialog", function(npcData)
         isInteracting = false 
         return 
     end
-    local textScale = npcData.textScale or 0.968
-    local textFont = npcData.textFont or "pricedown"
-    local textColor = npcData.textColor or "gold"
-    displayMessagesAbovePlayer(npcData.messages, textScale, textFont, textColor, function() isInteracting = false end)
+    
+    local dialogStyle = npcData.dialogStyle or "classic"
+    
+    if dialogStyle == "panel" then
+        -- Professionelles NUI Info-Panel anzeigen
+        SetNuiFocus(true, true)
+        SendNUIMessage({
+            action = 'showInfoPanel',
+            npcData = npcData
+        })
+    else
+        -- Klassischer schwebender Text
+        local textScale = npcData.textScale or 0.968
+        local textFont = npcData.textFont or "pricedown"
+        local textColor = npcData.textColor or "gold"
+        displayMessagesAbovePlayer(npcData.messages, textScale, textFont, textColor, function() isInteracting = false end)
+    end
+end)
+
+-- NUI Callback: Info-Panel geschlossen
+RegisterNUICallback('closeInfoPanel', function(data, cb)
+    SetNuiFocus(false, false)
+    isInteracting = false
+    cb('ok')
 end)
 
 function drawTextAbovePlayer(entity, text, scale, fontName, colorName)
