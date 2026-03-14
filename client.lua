@@ -174,7 +174,7 @@ Citizen.CreateThread(function()
                             local cfg = currentNPCConfigs[idx]
                             local font = cfg and cfg.textFont or "pricedown"
                             local color = cfg and cfg.textColor or "gold"
-                            drawTextAbovePlayer(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726, font, color)
+                            drawTextAboveEntity(ped, "Drücke ~g~E~s~, um zu sprechen", 0.726, font, color)
                             if IsControlJustReleased(0, interactKey) then
                                 isInteracting = true
                                 TriggerServerEvent("safenpc:interact", idx)
@@ -225,7 +225,8 @@ RegisterNUICallback('closeInfoPanel', function(data, cb)
     cb('ok')
 end)
 
-function drawTextAbovePlayer(entity, text, scale, fontName, colorName)
+-- Hint-Text über dem NPC (3D-Welt-Koordinaten)
+function drawTextAboveEntity(entity, text, scale, fontName, colorName)
     local entityCoords = GetEntityCoords(entity)
     local onScreen, _x, _y = World3dToScreen2d(entityCoords.x, entityCoords.y, entityCoords.z + 1.0)
     if onScreen then
@@ -243,6 +244,36 @@ function drawTextAbovePlayer(entity, text, scale, fontName, colorName)
     end
 end
 
+-- Zentrierter Text auf dem Bildschirm (feste Position, nicht 3D-gebunden)
+-- Unterstützt ## Prefix für größere Überschriften (1.5× Größe)
+function drawTextCentered(text, scale, fontName, colorName, yOffset)
+    local fontId = (TextFonts and TextFonts[fontName]) or 7
+    local color = (TextColors and TextColors[colorName]) or {255, 223, 0, 255}
+
+    -- ## Prefix = Überschrift (größerer Text)
+    local displayText = text
+    local displayScale = scale
+    if string.sub(text, 1, 2) == "##" then
+        displayText = string.sub(text, 3)
+        -- Leerzeichen am Anfang und Ende entfernen
+        displayText = displayText:match("^%s*(.-)%s*$") or displayText
+        displayScale = scale * 1.5
+    end
+
+    local screenY = yOffset or 0.30
+
+    SetTextFont(fontId)
+    SetTextScale(displayScale, displayScale)
+    SetTextCentre(true)
+    SetTextEdge(2, 0, 0, 0, 255)
+    SetTextOutline()
+    SetTextColour(color[1], color[2], color[3], color[4])
+    BeginTextCommandDisplayText("STRING")
+    AddTextComponentSubstringPlayerName(displayText)
+    EndTextCommandDisplayText(0.5, screenY)
+end
+
+-- Nachrichten zentriert auf dem Bildschirm anzeigen (eine nach der anderen)
 function displayMessagesAbovePlayer(messages, scale, fontName, colorName, callback)
     Citizen.CreateThread(function()
         local duration = (Config and Config.MessageDuration) or 3000
@@ -250,7 +281,7 @@ function displayMessagesAbovePlayer(messages, scale, fontName, colorName, callba
             local startTime = GetGameTimer()
             while GetGameTimer() - startTime < duration do
                 Citizen.Wait(0)
-                drawTextAbovePlayer(PlayerPedId(), message, scale, fontName, colorName)
+                drawTextCentered(message, scale, fontName, colorName, 0.30)
             end
         end
         if callback then callback() end

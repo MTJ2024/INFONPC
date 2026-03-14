@@ -151,14 +151,25 @@ function showInfoPanel(npcData) {
         row.className = 'npc-info-message';
         row.style.animationDelay = (i * 0.08) + 's';
         
+        // ## Prefix = Größere Überschrift
+        var isHeading = msg.startsWith('##');
+        var displayMsg = isHeading ? msg.substring(2).trim() : msg;
+        
         var bullet = document.createElement('div');
         bullet.className = 'npc-info-bullet';
         bullet.style.background = accentColor;
         bullet.style.boxShadow = '0 0 8px ' + accentColor + '4d';
         
         var text = document.createElement('div');
-        text.className = 'npc-info-msg-text';
-        text.textContent = msg;
+        text.className = isHeading ? 'npc-info-msg-text npc-info-msg-large' : 'npc-info-msg-text';
+        text.textContent = displayMsg;
+        
+        if (isHeading) {
+            bullet.style.width = '8px';
+            bullet.style.height = '8px';
+            bullet.style.minWidth = '8px';
+            bullet.style.marginTop = '8px';
+        }
         
         row.appendChild(bullet);
         row.appendChild(text);
@@ -463,7 +474,11 @@ function updatePreview() {
     var firstLine = 'Willkommen, Bürger...';
     if (msgs && msgs.trim()) {
         var lines = msgs.split('\n').filter(function(l) { return l.trim(); });
-        if (lines.length > 0) firstLine = lines[0];
+        if (lines.length > 0) {
+            firstLine = lines[0];
+            // Strip ## prefix for preview display
+            if (firstLine.startsWith('##')) firstLine = firstLine.substring(2).trim();
+        }
     }
     
     if (dialogStyle === 'panel') {

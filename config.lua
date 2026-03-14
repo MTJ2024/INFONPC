@@ -348,9 +348,10 @@ NPCConfigs = {
         header = "🏎️ Luxus Autohaus Prestige",
         subheader = "Premium Fahrzeuge — Exklusiver Service",
         messages = {
-            "Herzlich willkommen bei Prestige Motors!",
+            "## Herzlich willkommen bei Prestige Motors!",
             "Wir bieten Ihnen die exklusivsten Fahrzeuge der Stadt.",
             "Von eleganten Sportwagen bis hin zu luxuriösen Limousinen.",
+            "## Unser Service",
             "Vereinbaren Sie eine Probefahrt oder lassen Sie sich beraten.",
             "Unser Team steht Ihnen jederzeit zur Verfügung!",
         }

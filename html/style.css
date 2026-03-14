@@ -793,6 +793,14 @@ input[type="range"]::-webkit-slider-thumb {
     letter-spacing: 0.2px;
 }
 
+/* ## Prefix = Größere Überschrift im Info-Panel */
+.npc-info-msg-large {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: -0.2px;
+}
+
 @keyframes msgFadeIn {
     from { opacity: 0; transform: translateX(-8px); }
     to { opacity: 1; transform: translateX(0); }
@@ -852,4 +860,22 @@ input[type="range"]::-webkit-slider-thumb {
     color: #cbd5e1;
     font-size: 12px;
     line-height: 1.5;
+}
+
+/* ===== FIELD HINT (Tipps unter Formularfeldern) ===== */
+.field-hint {
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 6px;
+    padding: 4px 0;
+    letter-spacing: 0.2px;
+}
+
+.field-hint code {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c4b5fd;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Consolas', 'Monaco', monospace;
 }
