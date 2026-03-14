@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="npc-manager" class="hidden">
+        <div class="container">
+            <div class="header">
+                <h1>🎭 NPC Manager</h1>
+                <div class="header-right">
+                    <span class="badge" id="npcCount">0 NPCs</span>
+                    <button class="close-btn" onclick="closeUI()">✕</button>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="left-panel">
+                    <div class="section">
+                        <h2>NPC Liste</h2>
+                        <div class="npc-list" id="npcList"></div>
+                        <button class="btn btn-primary" onclick="createNewNPC()">+ Neuer NPC</button>
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="section" id="editorSection" style="display: none;">
+                        <h2 id="editorTitle">NPC Bearbeiten</h2>
+                        
+                        <!-- Dialog Style -->
+                        <div class="form-group">
+                            <label>🪟 Dialog-Stil:</label>
+                            <select id="dialogStyle" onchange="onDialogStyleChange()">
+                                <option value="classic">📝 Klassisch (Schwebender Text)</option>
+                                <option value="panel">🪟 Info-Panel (Professionell)</option>
+                                <option value="ticker">📰 Laufschrift (Ticker)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Header (nur bei panel) -->
+                        <div id="panelFields">
+                            <div class="form-group">
+                                <label>📰 Header / Titel:</label>
+                                <input type="text" id="npcHeader" placeholder="z.B. 🏎️ Luxus Autohaus Prestige" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>📎 Untertitel:</label>
+                                <input type="text" id="npcSubheader" placeholder="z.B. Premium Fahrzeuge — Exklusiver Service" oninput="updatePreview()">
+                            </div>
+                        </div>
+                        
+                        <!-- Ped Model Dropdown -->
+                        <div class="form-group">
+                            <label>👤 Ped Model:</label>
+                            <select id="pedModelSelect" onchange="onPedModelChange()">
+                                <optgroup label="👩 Frauen (Business &amp; Luxus)">
+                                    <option value="a_f_y_business_01">Geschäftsfrau (Blazer)</option>
+                                    <option value="a_f_y_business_02">Geschäftsfrau (Elegant)</option>
+                                    <option value="a_f_y_business_03">Geschäftsfrau (Modern)</option>
+                                    <option value="a_f_y_business_04">Geschäftsfrau (Chic)</option>
+                                    <option value="a_f_y_bevhills_01">Beverly Hills Lady</option>
+                                    <option value="a_f_y_bevhills_02">Beverly Hills Dame</option>
+                                    <option value="a_f_y_bevhills_03">Beverly Hills Schönheit</option>
+                                    <option value="a_f_y_bevhills_04">Beverly Hills Stil</option>
+                                    <option value="a_f_m_bevhills_01">Reife Beverly Hills</option>
+                                    <option value="a_f_m_bevhills_02">Nobelfrau</option>
+                                    <option value="a_f_y_vinewood_01">Vinewood Schauspielerin</option>
+                                    <option value="a_f_y_vinewood_02">Vinewood Stylistin</option>
+                                    <option value="a_f_y_vinewood_03">Vinewood Eleganz</option>
+                                    <option value="a_f_y_vinewood_04">Vinewood Glamour</option>
+                                    <option value="s_f_y_bartender_01">Barkeeperin</option>
+                                    <option value="a_f_y_fitness_01">Fitness-Frau</option>
+                                    <option value="a_f_y_fitness_02">Fitness-Lady</option>
+                                    <option value="a_f_y_hipster_01">Hipster-Frau</option>
+                                </optgroup>
+                                <optgroup label="👔 Männer (Business &amp; Luxus)">
+                                    <option value="a_m_y_business_01">Geschäftsmann (Anzug)</option>
+                                    <option value="a_m_y_business_02">Geschäftsmann (Modern)</option>
+                                    <option value="a_m_y_business_03">Geschäftsmann (Elegant)</option>
+                                    <option value="a_m_m_bevhills_01">Beverly Hills Mann</option>
+                                    <option value="a_m_m_bevhills_02">Beverly Hills Gentleman</option>
+                                    <option value="a_m_y_bevhills_01">Junger Beverly Hills</option>
+                                    <option value="a_m_y_bevhills_02">Beverly Hills Dresscode</option>
+                                    <option value="a_m_y_vinewood_01">Vinewood Star</option>
+                                </optgroup>
+                                <optgroup label="🎖️ Berufe &amp; Andere">
+                                    <option value="a_m_y_hipster_01">Hipster</option>
+                                    <option value="a_m_m_indian_01">Inder</option>
+                                    <option value="s_m_m_pilot_01">Pilot</option>
+                                    <option value="a_m_y_surfer_01">Surfer</option>
+                                    <option value="s_m_y_cop_01">Polizist</option>
+                                    <option value="s_m_m_doctor_01">Arzt</option>
+                                    <option value="s_m_y_fireman_01">Feuerwehrmann</option>
+                                    <option value="u_m_y_tattoo_01">Tätowierer</option>
+                                </optgroup>
+                                <optgroup label="✏️ Eigenes Model">
+                                    <option value="__custom__">✏️ Eigenes Model...</option>
+                                </optgroup>
+                            </select>
+                            <input type="text" id="pedModelCustom" placeholder="z.B. a_f_y_business_01" style="display:none; margin-top:8px;">
+                        </div>
+                        
+                        <!-- Position -->
+                        <div class="form-group">
+                            <label>📍 Position:</label>
+                            <div class="position-group">
+                                <input type="number" id="posX" placeholder="X" step="0.01">
+                                <input type="number" id="posY" placeholder="Y" step="0.01">
+                                <input type="number" id="posZ" placeholder="Z" step="0.01">
+                            </div>
+                            <button class="btn btn-secondary btn-small" onclick="getCurrentPosition()">📍 Aktuelle Position</button>
+                        </div>
+                        
+                        <!-- Heading -->
+                        <div class="form-group">
+                            <label>🧭 Heading:</label>
+                            <div class="inline-row">
+                                <input type="number" id="heading" placeholder="0-360" step="0.1" min="0" max="360">
+                                <button class="btn btn-secondary btn-small" onclick="getCurrentHeading()">🧭 Blickrichtung setzen (Ingame)</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Scenario Dropdown -->
+                        <div class="form-group">
+                            <label>🎬 Szenario:</label>
+                            <select id="scenario">
+                                <option value="WORLD_HUMAN_CLIPBOARD">📋 Klemmbrett</option>
+                                <option value="WORLD_HUMAN_GUARD_STAND">🛡️ Wache stehen</option>
+                                <option value="WORLD_HUMAN_SMOKING">🚬 Rauchen</option>
+                                <option value="WORLD_HUMAN_DRINKING">🍺 Trinken</option>
+                                <option value="WORLD_HUMAN_AA_COFFEE">☕ Kaffee trinken</option>
+                                <option value="WORLD_HUMAN_STAND_MOBILE">📱 Am Handy</option>
+                                <option value="WORLD_HUMAN_HANG_OUT_STREET">🧍 Herumstehen</option>
+                                <option value="WORLD_HUMAN_LEANING">🏗️ Anlehnen</option>
+                                <option value="WORLD_HUMAN_BUM_STANDING">🧑 Bettler</option>
+                                <option value="WORLD_HUMAN_TOURIST_MAP">🗺️ Karte lesen</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Patrol -->
+                        <div class="form-row">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="enablePatrol">
+                                    🚶 Patrol aktivieren
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Radius (m):</label>
+                                <input type="number" id="patrolRadius" placeholder="10.0" step="0.5" min="0">
+                            </div>
+                        </div>
+                        
+                        <hr class="divider">
+                        
+                        <!-- TEXT STYLING SECTION -->
+                        <h3 class="section-title">✨ Text-Styling</h3>
+                        
+                        <div class="style-row">
+                            <div class="form-group">
+                                <label>🔤 Schriftart:</label>
+                                <select id="textFont" onchange="updatePreview()">
+                                    <option value="pricedown">Pricedown (GTA)</option>
+                                    <option value="chalet">Chalet (Standard)</option>
+                                    <option value="condensed">Condensed (Schmal)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>🎨 Farbe:</label>
+                                <select id="textColor" onchange="updatePreview()">
+                                    <option value="gold">🟡 Gold</option>
+                                    <option value="weiss">⚪ Weiß</option>
+                                    <option value="rot">🔴 Rot</option>
+                                    <option value="gruen">🟢 Grün</option>
+                                    <option value="blau">🔵 Blau</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>📏 Größe:</label>
+                                <input type="range" id="textScale" min="0.4" max="1.5" step="0.05" value="0.968" oninput="updatePreview()">
+                                <span class="scale-value" id="scaleValue">0.97</span>
+                            </div>
+                        </div>
+                        
+                        <!-- LIVE PREVIEW -->
+                        <div class="preview-box" id="previewBox">
+                            <div class="preview-label">Vorschau</div>
+                            <div id="previewClassic">
+                                <div class="preview-text" id="previewText">Willkommen, Bürger...</div>
+                            </div>
+                            <div id="previewPanel" style="display:none; width:100%;">
+                                <div class="panel-preview-mini">
+                                    <div class="panel-preview-header" id="previewPanelHeader">🏎️ Luxus Autohaus</div>
+                                    <div class="panel-preview-sub" id="previewPanelSub">Premium Service</div>
+                                    <div class="panel-preview-msg" id="previewPanelMsg">Willkommen bei uns...</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="divider">
+                        
+                        <!-- Messages -->
+                        <div class="form-group">
+                            <label>💬 Nachrichten (eine pro Zeile):</label>
+                            <textarea id="messages" rows="5" placeholder="## Willkommen bei Prestige Motors!&#10;Wir bieten Ihnen exklusive Fahrzeuge.&#10;## Öffnungszeiten&#10;Mo-Fr: 10-20 Uhr" oninput="updatePreview()"></textarea>
+                            <div class="field-hint">💡 Tipp: Zeile mit <code>##</code> beginnen = größere Überschrift</div>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="button-group">
+                            <button class="btn btn-success" onclick="saveNPC()">💾 Speichern</button>
+                            <button class="btn btn-danger" onclick="deleteNPC()" id="deleteBtn">🗑️ Löschen</button>
+                            <button class="btn btn-secondary" onclick="cancelEdit()">Abbrechen</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Welcome Screen -->
+                    <div class="section" id="welcomeSection">
+                        <div class="welcome">
+                            <div class="welcome-icon">🎭</div>
+                            <h2>NPC Manager v3.0</h2>
+                            <p>Wähle einen NPC aus der Liste oder erstelle einen neuen.</p>
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <span class="feature-icon">🪟</span>
+                                    <span>Info-Panel Dialog</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">📰</span>
+                                    <span>Header & Untertitel</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">📜</span>
+                                    <span>Laufschrift</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">👩</span>
+                                    <span>30+ Ped-Modelle</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">🎨</span>
+                                    <span>Farben & Schriften</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">🚶</span>
+                                    <span>Patrol System</span>
+                                </div>
+                                <div class="feature-card">
+                                    <span class="feature-icon">👁️</span>
+                                    <span>Live-Vorschau</span>
+                                </div>
+                            </div>
+                            <p class="shortcut-hint">Öffne mit <code>/npc</code> oder <code>/npc_info</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== NPC INFO PANEL DIALOG (wird bei Interaktion angezeigt) ===== -->
+    <div id="npcInfoPanel" class="npc-info-overlay hidden">
+        <div class="npc-info-panel">
+            <div class="npc-info-accent"></div>
+            <div class="npc-info-header">
+                <div class="npc-info-icon" id="infoPanelIcon">ℹ️</div>
+                <div class="npc-info-titles">
+                    <h2 id="infoPanelHeader">Information</h2>
+                    <p id="infoPanelSubheader"></p>
+                </div>
+            </div>
+            <div class="npc-info-divider"></div>
+            <div class="npc-info-body" id="infoPanelBody">
+            </div>
+            <div class="npc-info-footer">
+                <span class="npc-info-hint">Drücke <kbd>ESC</kbd> zum Schließen</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== NPC TICKER / LAUFSCHRIFT (wird bei Interaktion angezeigt) ===== -->
+    <div id="npcTicker" class="npc-ticker hidden">
+        <div class="npc-ticker-accent"></div>
+        <div class="npc-ticker-track">
+            <div class="npc-ticker-content" id="tickerContent"></div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification (ersetzt alert()) -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Confirm Modal (ersetzt confirm() — kein FiveM-Crash) -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-text" id="confirmText">Bist du sicher?</div>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" id="confirmYes" onclick="onConfirmYes()">Ja, löschen</button>
+                <button class="btn btn-secondary" id="confirmNo" onclick="onConfirmNo()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
