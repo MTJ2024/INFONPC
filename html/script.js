@@ -73,6 +73,10 @@ window.addEventListener('message', function(event) {
         if (data.heading !== undefined) {
             document.getElementById('heading').value = data.heading.toFixed(4);
         }
+    } else if (data.action === 'hideForPlacement') {
+        document.getElementById('npc-manager').classList.add('hidden');
+    } else if (data.action === 'showAfterPlacement') {
+        document.getElementById('npc-manager').classList.remove('hidden');
     } else if (data.action === 'showInfoPanel') {
         showInfoPanel(data.npcData);
     } else if (data.action === 'hideInfoPanel') {
@@ -617,7 +621,7 @@ function getCurrentPosition() {
 }
 
 function getCurrentHeading() {
-    fetch('https://' + GetParentResourceName() + '/getCurrentHeading', {
+    fetch('https://' + GetParentResourceName() + '/startHeadingPlacement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})

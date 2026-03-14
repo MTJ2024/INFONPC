@@ -2,6 +2,7 @@ local myNPCs = {}
 local isInteracting = false
 local isUIOpen = false
 local currentNPCConfigs = {} -- Cache der aktuellen NPC-Konfigurationen
+local headingPlacementActive = false -- Heading-Platzierungsmodus aktiv
 
 -- NUI Management Command
 RegisterCommand('npc_info', function()
@@ -61,6 +62,95 @@ RegisterNUICallback('getCurrentHeading', function(data, cb)
         heading = heading
     })
     cb('ok')
+end)
+
+-- ┌──────────────────────────────────────────────────────────────────────────────┐
+-- │  🧭  INGAME HEADING-PLATZIERUNG                                            │
+-- │  Dashboard blendet aus, Spieler schaut frei mit der Maus,                   │
+-- │  ENTER bestätigt Blickrichtung, BACKSPACE bricht ab.                        │
+-- └──────────────────────────────────────────────────────────────────────────────┘
+
+-- NUI Callback: Heading-Platzierung starten
+RegisterNUICallback('startHeadingPlacement', function(data, cb)
+    headingPlacementActive = true
+    isUIOpen = false
+    SendNUIMessage({ action = 'hideForPlacement' })
+    SetNuiFocus(false, false)
+    cb('ok')
+end)
+
+-- Heading-Platzierungs-Thread
+Citizen.CreateThread(function()
+    while true do
+        if headingPlacementActive then
+            Citizen.Wait(0)
+
+            -- Aktuelle Kamera-Richtung als Heading
+            local camRot = GetGameplayCamRot(0)
+            local liveHeading = (camRot.z + 360.0) % 360.0
+
+            -- Kompass-Richtung
+            local compass = "N"
+            if liveHeading >= 22.5 and liveHeading < 67.5 then compass = "NW"
+            elseif liveHeading >= 67.5 and liveHeading < 112.5 then compass = "W"
+            elseif liveHeading >= 112.5 and liveHeading < 157.5 then compass = "SW"
+            elseif liveHeading >= 157.5 and liveHeading < 202.5 then compass = "S"
+            elseif liveHeading >= 202.5 and liveHeading < 247.5 then compass = "SO"
+            elseif liveHeading >= 247.5 and liveHeading < 292.5 then compass = "O"
+            elseif liveHeading >= 292.5 and liveHeading < 337.5 then compass = "NO"
+            end
+
+            -- Richtungslinie zeichnen (goldene Linie in Blickrichtung)
+            local playerCoords = GetEntityCoords(PlayerPedId())
+            local rad = math.rad(liveHeading)
+            local dirX = -math.sin(rad) * 4.0
+            local dirY = math.cos(rad) * 4.0
+            DrawLine(
+                playerCoords.x, playerCoords.y, playerCoords.z + 0.3,
+                playerCoords.x + dirX, playerCoords.y + dirY, playerCoords.z + 0.3,
+                255, 223, 0, 200
+            )
+
+            -- Endpunkt-Marker (flacher goldener Ring am Boden)
+            DrawMarker(1,
+                playerCoords.x + dirX, playerCoords.y + dirY, playerCoords.z - 0.98,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.5, 0.5, 0.1,
+                255, 223, 0, 120,
+                false, true, 2, false, nil, nil, false
+            )
+
+            -- Heading-Anzeige + Anleitung
+            drawTextCentered(string.format("~y~%s  %.1f°", compass, liveHeading), 0.55, "chalet", "gold", 0.82)
+            drawTextCentered("Schaue in die gewünschte NPC-Richtung", 0.40, "chalet", "weiss", 0.87)
+            drawTextCentered("~g~ENTER~s~ = Bestätigen    ~r~BACKSPACE~s~ = Abbrechen", 0.35, "chalet", "weiss", 0.92)
+
+            -- Tasten abfangen
+            DisableControlAction(0, 191, true)
+            DisableControlAction(0, 177, true)
+
+            -- ENTER = Heading bestätigen
+            if IsDisabledControlJustReleased(0, 191) then
+                headingPlacementActive = false
+                PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+                SendNUIMessage({ action = 'setHeading', heading = liveHeading })
+                SendNUIMessage({ action = 'showAfterPlacement' })
+                SetNuiFocus(true, true)
+                isUIOpen = true
+            end
+
+            -- BACKSPACE = Abbrechen
+            if IsDisabledControlJustReleased(0, 177) then
+                headingPlacementActive = false
+                PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+                SendNUIMessage({ action = 'showAfterPlacement' })
+                SetNuiFocus(true, true)
+                isUIOpen = true
+            end
+        else
+            Citizen.Wait(500)
+        end
+    end
 end)
 
 -- Update NPC list in UI
@@ -235,8 +325,8 @@ end)
 
 Citizen.CreateThread(function()
     while true do
-        -- Wenn UI offen ist, längere Wartezeit (kein NPC-Checking nötig)
-        if isUIOpen then
+        -- Wenn UI offen oder Heading-Platzierung aktiv, längere Wartezeit
+        if isUIOpen or headingPlacementActive then
             Citizen.Wait(1000)
         else
             local sleep = 500 -- Standard-Wartezeit wenn weit weg
