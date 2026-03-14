@@ -256,7 +256,7 @@ function showTicker(npcData) {
     var contentWidth = content.scrollWidth;
     var viewportWidth = window.innerWidth;
     var totalDistance = contentWidth + viewportWidth;
-    // ~80px pro Sekunde Scrollgeschwindigkeit
+    // Scrollgeschwindigkeit: ~80 Pixel pro Sekunde
     var duration = Math.max(8, totalDistance / 80);
     
     content.style.animation = 'tickerScroll ' + duration + 's linear forwards';

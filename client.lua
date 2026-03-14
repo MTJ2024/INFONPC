@@ -51,8 +51,11 @@ RegisterNUICallback('getCurrentPosition', function(data, cb)
 end)
 
 RegisterNUICallback('getCurrentHeading', function(data, cb)
-    local playerPed = PlayerPedId()
-    local heading = GetEntityHeading(playerPed)
+    -- Kamera-Heading verwenden statt Entity-Heading
+    -- So schaut der NPC exakt in die Blickrichtung des Spielers (Maus/Kamera)
+    local camRot = GetGameplayCamRot(0)
+    -- +360 % 360 normalisiert negative Kamera-Werte auf 0-360 Bereich
+    local heading = (camRot.z + 360.0) % 360.0
     SendNUIMessage({
         action = 'setHeading',
         heading = heading
