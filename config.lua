@@ -69,6 +69,9 @@ Config.DefaultDialogStyle = "panel"             -- Standard Dialog-Stil für neu
                                                 -- "panel"   = Professionelles Info-Panel (NEU!)
                                                 --              mit Header, Untertitel & formatiertem Text
                                                 --              Perfekt für Autohäuser, Shops, etc.
+                                                -- "ticker"  = Laufschrift / Scrolling Text (NEU!)
+                                                --              Scrollt Nachrichten am unteren Bildschirmrand
+                                                --              Spieler bleibt frei beweglich
 
 -- ┌──────────────────────────────────────────────────────────────────────────────┐
 -- │  🚶  PATROL STANDARDWERTE                                                   │

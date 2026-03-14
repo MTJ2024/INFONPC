@@ -209,6 +209,12 @@ RegisterNetEvent("safenpc:showDialog", function(npcData)
             action = 'showInfoPanel',
             npcData = npcData
         })
+    elseif dialogStyle == "ticker" then
+        -- Laufschrift (Ticker) — NUI ohne Fokus, Spieler bleibt frei
+        SendNUIMessage({
+            action = 'showTicker',
+            npcData = npcData
+        })
     else
         -- Klassischer schwebender Text
         local textScale = npcData.textScale or 0.968
@@ -221,6 +227,12 @@ end)
 -- NUI Callback: Info-Panel geschlossen
 RegisterNUICallback('closeInfoPanel', function(data, cb)
     SetNuiFocus(false, false)
+    isInteracting = false
+    cb('ok')
+end)
+
+-- NUI Callback: Ticker (Laufschrift) fertig
+RegisterNUICallback('tickerDone', function(data, cb)
     isInteracting = false
     cb('ok')
 end)

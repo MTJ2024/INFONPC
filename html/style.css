@@ -879,3 +879,81 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 11px;
     font-family: 'Consolas', 'Monaco', monospace;
 }
+
+/* ===== NPC TICKER / LAUFSCHRIFT ===== */
+.npc-ticker {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100vw;
+    z-index: 99985;
+    pointer-events: none;
+    animation: tickerFadeIn 0.5s ease;
+}
+
+.npc-ticker.hidden {
+    display: none !important;
+}
+
+@keyframes tickerFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.npc-ticker-accent {
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #eab308, #f59e0b);
+    background-size: 200% 100%;
+    animation: accentShimmer 3s ease infinite;
+}
+
+.npc-ticker-track {
+    background: linear-gradient(180deg, rgba(10, 10, 25, 0.92), rgba(15, 15, 35, 0.95));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 14px 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.npc-ticker-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    white-space: nowrap;
+    will-change: transform;
+    padding-left: 100vw;
+}
+
+@keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - 100vw)); }
+}
+
+.ticker-item {
+    color: #cbd5e1;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    padding: 0 6px;
+}
+
+.ticker-header {
+    font-size: 17px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* ## Prefix = Größerer Text im Ticker */
+.ticker-large {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.1px;
+}
+
+.ticker-separator {
+    padding: 0 16px;
+    font-size: 10px;
+    opacity: 0.5;
+}

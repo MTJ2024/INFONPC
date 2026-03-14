@@ -36,6 +36,7 @@
                             <select id="dialogStyle" onchange="onDialogStyleChange()">
                                 <option value="classic">📝 Klassisch (Schwebender Text)</option>
                                 <option value="panel">🪟 Info-Panel (Professionell)</option>
+                                <option value="ticker">📰 Laufschrift (Ticker)</option>
                             </select>
                         </div>
                         
@@ -232,6 +233,10 @@
                                     <span>Header & Untertitel</span>
                                 </div>
                                 <div class="feature-card">
+                                    <span class="feature-icon">📜</span>
+                                    <span>Laufschrift</span>
+                                </div>
+                                <div class="feature-card">
                                     <span class="feature-icon">👩</span>
                                     <span>30+ Ped-Modelle</span>
                                 </div>
@@ -273,6 +278,14 @@
             <div class="npc-info-footer">
                 <span class="npc-info-hint">Drücke <kbd>ESC</kbd> zum Schließen</span>
             </div>
+        </div>
+    </div>
+    
+    <!-- ===== NPC TICKER / LAUFSCHRIFT (wird bei Interaktion angezeigt) ===== -->
+    <div id="npcTicker" class="npc-ticker hidden">
+        <div class="npc-ticker-accent"></div>
+        <div class="npc-ticker-track">
+            <div class="npc-ticker-content" id="tickerContent"></div>
         </div>
     </div>
     

@@ -4,6 +4,7 @@ let isEditMode = false;
 let toastTimer = null;
 let confirmCallback = null;
 let infoPanelOpen = false;
+let tickerTimer = null;
 
 // Color map for preview and list dots
 const COLOR_MAP = {
@@ -76,6 +77,10 @@ window.addEventListener('message', function(event) {
         showInfoPanel(data.npcData);
     } else if (data.action === 'hideInfoPanel') {
         hideInfoPanel();
+    } else if (data.action === 'showTicker') {
+        showTicker(data.npcData);
+    } else if (data.action === 'hideTicker') {
+        hideTicker();
     }
 });
 
@@ -184,6 +189,101 @@ function hideInfoPanel() {
     document.getElementById('npcInfoPanel').classList.add('hidden');
 }
 
+// ===== NPC TICKER / LAUFSCHRIFT =====
+function showTicker(npcData) {
+    if (!npcData || !npcData.messages) return;
+    
+    var ticker = document.getElementById('npcTicker');
+    var content = document.getElementById('tickerContent');
+    var accent = ticker.querySelector('.npc-ticker-accent');
+    
+    // Accent color
+    var accentColor = '#f59e0b';
+    var colorMap = {
+        gold: '#f59e0b', weiss: '#e2e8f0', rot: '#ef4444',
+        gruen: '#22c55e', blau: '#3b82f6'
+    };
+    if (npcData.textColor && colorMap[npcData.textColor]) {
+        accentColor = colorMap[npcData.textColor];
+    }
+    accent.style.background = 'linear-gradient(90deg, ' + accentColor + ', ' + accentColor + 'cc, ' + accentColor + ')';
+    
+    // Build ticker content with ## support
+    content.innerHTML = '';
+    var messages = npcData.messages || [];
+    
+    // Header wenn vorhanden
+    if (npcData.header) {
+        var headerSpan = document.createElement('span');
+        headerSpan.className = 'ticker-item ticker-header';
+        headerSpan.textContent = npcData.header;
+        headerSpan.style.color = accentColor;
+        content.appendChild(headerSpan);
+        
+        var sep = document.createElement('span');
+        sep.className = 'ticker-separator';
+        sep.textContent = '◆';
+        sep.style.color = accentColor;
+        content.appendChild(sep);
+    }
+    
+    messages.forEach(function(msg, i) {
+        var isHeading = msg.startsWith('##');
+        var displayMsg = isHeading ? msg.substring(2).trim() : msg;
+        
+        var span = document.createElement('span');
+        span.className = isHeading ? 'ticker-item ticker-large' : 'ticker-item';
+        span.textContent = displayMsg;
+        content.appendChild(span);
+        
+        // Trenner zwischen Nachrichten
+        if (i < messages.length - 1) {
+            var sep = document.createElement('span');
+            sep.className = 'ticker-separator';
+            sep.textContent = '•';
+            sep.style.color = accentColor;
+            content.appendChild(sep);
+        }
+    });
+    
+    // Animation berechnen: Breite des Contents bestimmt Dauer
+    ticker.classList.remove('hidden');
+    content.style.animation = 'none';
+    
+    // Force reflow, dann Animation starten
+    void content.offsetWidth;
+    
+    var contentWidth = content.scrollWidth;
+    var viewportWidth = window.innerWidth;
+    var totalDistance = contentWidth + viewportWidth;
+    // ~80px pro Sekunde Scrollgeschwindigkeit
+    var duration = Math.max(8, totalDistance / 80);
+    
+    content.style.animation = 'tickerScroll ' + duration + 's linear forwards';
+    
+    // Nach Animation: Ticker ausblenden und Client benachrichtigen
+    if (tickerTimer) clearTimeout(tickerTimer);
+    tickerTimer = setTimeout(function() {
+        hideTicker();
+        fetch('https://' + GetParentResourceName() + '/tickerDone', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+    }, duration * 1000 + 500);
+}
+
+function hideTicker() {
+    if (tickerTimer) {
+        clearTimeout(tickerTimer);
+        tickerTimer = null;
+    }
+    var ticker = document.getElementById('npcTicker');
+    ticker.classList.add('hidden');
+    var content = document.getElementById('tickerContent');
+    content.style.animation = 'none';
+}
+
 function hexToRgb(hex) {
     hex = hex.replace('#', '');
     var r = parseInt(hex.substring(0, 2), 16);
@@ -236,7 +336,8 @@ function renderNPCList() {
         // Style badge
         var styleBadge = document.createElement('span');
         styleBadge.className = 'style-badge';
-        styleBadge.textContent = (npc.dialogStyle === 'panel') ? '🪟' : '📝';
+        var styleIcons = { panel: '🪟', ticker: '📰', classic: '📝' };
+        styleBadge.textContent = styleIcons[npc.dialogStyle] || '📝';
         header.appendChild(styleBadge);
         
         var title = document.createElement('span');
@@ -247,7 +348,8 @@ function renderNPCList() {
         var info = document.createElement('div');
         info.className = 'npc-item-info';
         var msgCount = (npc.messages && npc.messages.length) || 0;
-        var style = npc.dialogStyle === 'panel' ? 'Panel' : 'Klassisch';
+        var styleNames = { panel: 'Panel', ticker: 'Ticker', classic: 'Klassisch' };
+        var style = styleNames[npc.dialogStyle] || 'Klassisch';
         info.textContent = (npc.pedModel || '?') + ' | ' + msgCount + ' Nachr. | ' + style;
         
         item.appendChild(header);
@@ -260,7 +362,7 @@ function renderNPCList() {
 function onDialogStyleChange() {
     var style = document.getElementById('dialogStyle').value;
     var panelFields = document.getElementById('panelFields');
-    panelFields.style.display = (style === 'panel') ? 'block' : 'none';
+    panelFields.style.display = (style === 'panel' || style === 'ticker') ? 'block' : 'none';
     updatePreview();
 }
 
@@ -486,6 +588,13 @@ function updatePreview() {
         previewPanel.style.display = 'block';
         document.getElementById('previewPanelHeader').textContent = document.getElementById('npcHeader').value || 'Header...';
         document.getElementById('previewPanelSub').textContent = document.getElementById('npcSubheader').value || 'Untertitel...';
+        document.getElementById('previewPanelMsg').textContent = firstLine;
+    } else if (dialogStyle === 'ticker') {
+        previewClassic.style.display = 'none';
+        previewPanel.style.display = 'block';
+        var hdr = document.getElementById('npcHeader').value || '';
+        document.getElementById('previewPanelHeader').textContent = '📰 ' + (hdr || 'Laufschrift');
+        document.getElementById('previewPanelSub').textContent = '◀ scrollt über den Bildschirm ▶';
         document.getElementById('previewPanelMsg').textContent = firstLine;
     } else {
         previewClassic.style.display = 'block';
