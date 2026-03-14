@@ -296,25 +296,35 @@ end)
 -- Prüft Bodenhöhe und Höhendifferenz zur Startposition
 function findSafePatrolPoint(center, radius, maxHeightDiff)
     maxHeightDiff = maxHeightDiff or 3.0
+
+    -- Sicherheitscheck: Position muss gültige Zahlenwerte haben
+    local cx = tonumber(center and center.x)
+    local cy = tonumber(center and center.y)
+    local cz = tonumber(center and center.z)
+    if not cx or not cy or not cz then
+        print("[SafeNPC] WARNUNG: Ungültige Patrol-Position, Fallback auf 0,0,0")
+        return vector3(0.0, 0.0, 0.0)
+    end
+
     for attempt = 1, 6 do
         -- Zufälliger Punkt (15-90% des Radius: nicht zu nah am Zentrum, nicht am Rand)
         local angle = math.random() * 2 * math.pi
         local dist = radius * 0.15 + math.random() * radius * 0.75
-        local x = center.x + math.cos(angle) * dist
-        local y = center.y + math.sin(angle) * dist
+        local x = cx + math.cos(angle) * dist
+        local y = cy + math.sin(angle) * dist
 
         -- Bodenhöhe ermitteln
-        local found, groundZ = GetGroundZFor_3dCoord(x, y, center.z + 50.0, false)
-        if found and groundZ > 0 then
+        local found, groundZ = GetGroundZFor_3dCoord(x, y, cz + 50.0, false)
+        if found and groundZ and groundZ > 0 then
             -- Höhendifferenz prüfen (kein Abgrund/Dach)
-            if math.abs(groundZ - center.z) < maxHeightDiff then
+            if math.abs(groundZ - cz) < maxHeightDiff then
                 return vector3(x, y, groundZ)
             end
         end
     end
     -- Fallback: leicht versetzte Position nahe Zentrum
     local angle = math.random() * 2 * math.pi
-    return vector3(center.x + math.cos(angle) * 2.0, center.y + math.sin(angle) * 2.0, center.z)
+    return vector3(cx + math.cos(angle) * 2.0, cy + math.sin(angle) * 2.0, cz)
 end
 
 AddEventHandler("onClientResourceStart", function(res)

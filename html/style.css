@@ -235,6 +235,20 @@ body {
     padding-right: 32px;
 }
 
+/* Dropdown-Optionen lesbar machen (verhindert Weiß-auf-Weiß im CEF-Popup) */
+.form-group select option {
+    background-color: #2a2a45;
+    color: #e0e0e0;
+    padding: 6px 10px;
+}
+
+.form-group select optgroup {
+    background-color: #1e1e32;
+    color: #a0a0c0;
+    font-style: normal;
+    font-weight: 600;
+}
+
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
