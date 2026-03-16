@@ -162,6 +162,28 @@ RegisterNetEvent("safenpc:deleteNPC", function(index)
         return
     end
     
+    -- Wenn DynamicNPCs leer ist, kopiere aus NPCConfigs
+    if #DynamicNPCs == 0 and NPCConfigs then
+        DynamicNPCs = {}
+        for i, npc in ipairs(NPCConfigs) do
+            table.insert(DynamicNPCs, {
+                position = {x = npc.position.x, y = npc.position.y, z = npc.position.z},
+                heading = npc.heading,
+                pedModel = npc.pedModel,
+                patrolRadius = npc.patrolRadius,
+                enablePatrol = npc.enablePatrol,
+                scenario = npc.scenario,
+                textFont = npc.textFont,
+                textColor = npc.textColor,
+                textScale = npc.textScale,
+                dialogStyle = npc.dialogStyle,
+                header = npc.header,
+                subheader = npc.subheader,
+                messages = npc.messages
+            })
+        end
+    end
+    
     local luaIndex = index ~= nil and (index + 1) or nil
     if luaIndex and luaIndex >= 1 and luaIndex <= #DynamicNPCs then
         table.remove(DynamicNPCs, luaIndex)
