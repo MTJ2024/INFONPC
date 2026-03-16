@@ -532,6 +532,8 @@ function saveNPC() {
             index: isEditMode ? selectedNPCIndex : null,
             npc: npcData
         })
+    }).then(function() {
+        showToast('✅ NPC gespeichert!', 'success');
     });
 }
 
@@ -587,17 +589,24 @@ function updatePreview() {
         }
     }
     
+    // Accent color mapping for panel/ticker preview
+    var accentHex = COLOR_MAP[color] || '#ffdf00';
+    
     if (dialogStyle === 'panel') {
         previewClassic.style.display = 'none';
         previewPanel.style.display = 'block';
-        document.getElementById('previewPanelHeader').textContent = document.getElementById('npcHeader').value || 'Header...';
+        var headerEl = document.getElementById('previewPanelHeader');
+        headerEl.textContent = document.getElementById('npcHeader').value || 'Header...';
+        headerEl.style.color = accentHex;
         document.getElementById('previewPanelSub').textContent = document.getElementById('npcSubheader').value || 'Untertitel...';
         document.getElementById('previewPanelMsg').textContent = firstLine;
     } else if (dialogStyle === 'ticker') {
         previewClassic.style.display = 'none';
         previewPanel.style.display = 'block';
         var hdr = document.getElementById('npcHeader').value || '';
-        document.getElementById('previewPanelHeader').textContent = '📰 ' + (hdr || 'Laufschrift');
+        var tickerHeaderEl = document.getElementById('previewPanelHeader');
+        tickerHeaderEl.textContent = '📰 ' + (hdr || 'Laufschrift');
+        tickerHeaderEl.style.color = accentHex;
         document.getElementById('previewPanelSub').textContent = '◀ scrollt über den Bildschirm ▶';
         document.getElementById('previewPanelMsg').textContent = firstLine;
     } else {
